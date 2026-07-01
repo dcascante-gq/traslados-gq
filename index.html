@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traslados de Presupuesto 2026 — Grupo Q</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f5f7;color:#1a1a2e;font-size:14px;line-height:1.5}
+.topbar{background:#1B3A6B;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.logo-pill{background:#C0272D;color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;letter-spacing:.5px}
+.topbar h1{font-size:15px;font-weight:500}
+.topbar .sol-num{margin-left:auto;font-size:12px;opacity:.75;font-family:monospace}
+.wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+.tabs{display:flex;gap:0;border-bottom:2px solid #dde3ef;margin-bottom:20px}
+.tab-btn{padding:10px 20px;font-size:13px;font-weight:500;background:none;border:none;cursor:pointer;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-btn.active{color:#1B3A6B;border-bottom-color:#1B3A6B}
+.tab-btn:hover:not(.active){color:#1B3A6B;background:#f0f4ff}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.card-title svg{opacity:.6}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.4px}
+.field input,.field select,.field textarea{border:1px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;color:#1a1a2e;background:#fff;transition:border-color .15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#1B3A6B;box-shadow:0 0 0 3px rgba(27,58,107,.1)}
+.field input[readonly]{background:#f8fafc;color:#6b7280;cursor:default}
+.field select{cursor:pointer}
+/* Lines table */
+.lines-table{width:100%;border-collapse:collapse}
+.lines-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;padding:6px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+.lines-table td{padding:5px 6px;vertical-align:middle}
+.lines-table tr:not(:last-child) td{border-bottom:1px solid #f1f5f9}
+.lines-table input,.lines-table select{width:100%;border:1px solid #e2e8f0;border-radius:5px;padding:6px 8px;font-size:12px;color:#1a1a2e;background:#fff;font-family:inherit}
+.lines-table input:focus,.lines-table select:focus{outline:none;border-color:#1B3A6B}
+.lines-table input[readonly]{background:#f8fafc;color:#6b7280}
+.desc-cell{font-size:11px;color:#6b7280;padding:4px 8px;background:#f8fafc;border-radius:4px;min-width:140px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mov-toggle{display:flex;border-radius:6px;overflow:hidden;border:1px solid #d1d5db}
+.mov-btn{flex:1;padding:6px 8px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.mov-btn.plus{background:#f0fdf4;color:#15803d}
+.mov-btn.plus.active{background:#15803d;color:#fff}
+.mov-btn.minus{background:#fef2f2;color:#b91c1c}
+.mov-btn.minus.active{background:#b91c1c;color:#fff}
+.btn-remove{width:30px;height:30px;border:1px solid #e2e8f0;background:#fff;border-radius:6px;cursor:pointer;color:#9ca3af;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-remove:hover{background:#fef2f2;border-color:#fca5a5;color:#b91c1c}
+.btn-add-line{display:flex;align-items:center;gap:6px;font-size:12px;color:#1B3A6B;background:none;border:1.5px dashed #93c5fd;border-radius:6px;padding:7px 14px;cursor:pointer;margin-top:10px;transition:all .15s;font-weight:500}
+.btn-add-line:hover{background:#eff6ff;border-color:#1B3A6B}
+/* Totals bar */
+.totals-bar{display:flex;align-items:center;gap:0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-top:14px}
+.tot-item{flex:1;padding:12px 16px;border-right:1px solid #e2e8f0}
+.tot-item:last-child{border-right:none}
+.tot-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;margin-bottom:4px}
+.tot-val{font-size:18px;font-weight:600;font-family:monospace}
+.tot-verde{color:#15803d}
+.tot-rojo{color:#b91c1c}
+.tot-dif{color:#1B3A6B}
+.status-badge{display:flex;align-items:center;gap:6px;padding:12px 16px;font-size:12px;font-weight:600}
+.status-ok{color:#15803d;background:#f0fdf4}
+.status-err{color:#b91c1c;background:#fef2f2}
+/* SAP preview */
+.sap-pre{background:#0f172a;color:#94a3b8;font-family:'Courier New',monospace;font-size:11px;padding:14px 16px;border-radius:8px;overflow-x:auto;line-height:1.8}
+.sap-pre .sap-plus{color:#4ade80}
+.sap-pre .sap-minus{color:#f87171}
+.sap-pre .sap-head{color:#60a5fa;font-weight:700}
+/* Actions */
+.actions{display:flex;gap:10px;justify-content:flex-end;padding-top:8px}
+.btn{padding:9px 20px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;font-family:inherit}
+.btn-ghost{background:#fff;border:1px solid #d1d5db;color:#374151}
+.btn-ghost:hover{background:#f9fafb;border-color:#9ca3af}
+.btn-danger{background:#fff;border:1px solid #fca5a5;color:#b91c1c}
+.btn-danger:hover{background:#fef2f2}
+.btn-primary{background:#1B3A6B;border:none;color:#fff}
+.btn-primary:hover{background:#15306b}
+.btn-primary:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-copy{background:#fff;border:1px solid #d1d5db;color:#374151;font-size:12px;padding:7px 14px}
+.btn-copy:hover{background:#f0f4ff;border-color:#1B3A6B;color:#1B3A6B}
+/* Historial */
+.hist-table{width:100%;border-collapse:collapse}
+.hist-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0}
+.hist-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px}
+.hist-table tr:hover td{background:#f8fafc}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.chip-ok{background:#dcfce7;color:#15803d}
+.chip-draft{background:#fef9c3;color:#a16207}
+.badge-c101{background:#dbeafe;color:#1e40af;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-c105{background:#d1fae5;color:#065f46;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.hist-empty{text-align:center;padding:40px;color:#9ca3af;font-size:13px}
+.sol-link{color:#1B3A6B;font-weight:600;cursor:pointer;font-family:monospace;font-size:12px}
+.sol-link:hover{text-decoration:underline}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1B3A6B;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1}
+/* Autocomplete dropdown */
+.ac-wrap{position:relative}
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d1d5db;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:500;max-height:200px;overflow-y:auto;display:none}
+.ac-drop.open{display:block}
+.ac-item{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f1f5f9}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.selected{background:#eff6ff;color:#1B3A6B}
+.ac-item .ac-code{font-family:monospace;color:#1B3A6B;font-weight:600;margin-right:6px}
+.ac-item .ac-desc{color:#6b7280}
+@media(max-width:768px){.grid-3{grid-template-columns:1fr 1fr}.lines-table{font-size:11px}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-authentication-library-for-js/2.38.3/msal-browser.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo-pill">GQ</span>
+  <h1>Solicitud de traslado de presupuesto 2026</h1>
+  <span class="sol-num" id="topSolNum">SOL-2026-0001</span>
+  <div id="loginArea" style="margin-left:16px;display:flex;align-items:center;gap:8px">
+    <span id="userDisplay" style="font-size:12px;opacity:.8;display:none"></span>
+    <button id="btnLogin" onclick="loginMSAL()" style="font-size:12px;padding:5px 12px;background:#C0272D;color:#fff;border:none;border-radius:5px;cursor:pointer">Iniciar sesión</button>
+    <button id="btnLogout" onclick="logoutMSAL()" style="font-size:12px;padding:5px 12px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:5px;cursor:pointer;display:none">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('nueva')">&#43; Nueva solicitud</button>
+    <button class="tab-btn" onclick="showTab('historial')">&#9776; Historial</button>
+  </div>
+
+  <!-- TAB: NUEVA SOLICITUD -->
+  <div id="tab-nueva">
+
+    <!-- Datos generales -->
+    <div class="card">
+      <div class="card-title">&#128197; Datos generales</div>
+      <div class="grid-3">
+        <div class="field">
+          <label>Fecha</label>
+          <input type="text" id="fecha" readonly>
+        </div>
+        <div class="field">
+          <label>N.º solicitud</label>
+          <input type="text" id="solNum" readonly>
+        </div>
+        <div class="field">
+          <label>Empresa *</label>
+          <select id="empresa" onchange="onEmpresaChange()">
+            <option value="">— Seleccione —</option>
+            <option value="C101">C101 — Corporación GQ CR</option>
+            <option value="C105">C105 — Active Motors CR</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Solicitante *</label>
+          <input type="text" id="solicitante" placeholder="Nombre completo">
+        </div>
+      </div>
+    </div>
+
+    <!-- Líneas -->
+    <div class="card">
+      <div class="card-title">&#9776; Líneas de traslado</div>
+      <div style="overflow-x:auto">
+        <table class="lines-table">
+          <thead>
+            <tr>
+              <th style="width:220px">Centro de costos</th>
+              <th style="width:120px">Cuenta contable</th>
+              <th style="width:180px">Descripción</th>
+              <th style="width:100px">Monto USD</th>
+              <th style="width:70px">Mov.</th>
+              <th>Justificación *</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="linesBody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-line" onclick="addLine()">&#43; Agregar línea</button>
+
+      <div class="totals-bar" id="totalsBar">
+        <div class="tot-item">
+          <div class="tot-label">Total aumentos</div>
+          <div class="tot-val tot-verde" id="totAum">+ $0.00</div>
+        </div>
+        <div class="tot-item">
+          <div class="tot-label">Total disminuciones</div>
+          <div class="tot-val tot-rojo" id="totDis">− $0.00</div>
+        </div>
+        <div class="tot-item">
+          <div class="tot-label">Diferencia</div>
+          <div class="tot-val tot-dif" id="totDif">$0.00</div>
+        </div>
+        <div class="status-badge" id="statusBadge">
+          <span style="font-size:16px">&#9678;</span> Ingrese líneas
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista previa SAP -->
+    <div class="card" id="sapCard" style="display:none">
+      <div class="card-title">&#128196; Plantilla SAP — lista para pegar</div>
+      <pre class="sap-pre" id="sapPre"></pre>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:8px">
+        <button class="btn btn-copy" onclick="copySAP()">&#128203; Copiar al portapapeles</button>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <button class="btn btn-danger" onclick="clearForm()">&#128465; Limpiar</button>
+      <button class="btn btn-ghost" onclick="saveAsDraft()">&#128190; Guardar borrador</button>
+      <button class="btn btn-primary" id="btnRegistrar" onclick="registrar()" disabled>&#10003; Registrar solicitud</button>
+    </div>
+  </div>
+
+  <!-- TAB: HISTORIAL -->
+  <div id="tab-historial" style="display:none">
+    <div class="card">
+      <div class="card-title">&#128203; Historial de solicitudes</div>
+      <div id="histContent"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DB = {
+  cecos: [{"c":"APT0460531","d":"Autopits Liberia","s":"C101"},{"c":"APT1046531","d":"Autopits Grecia","s":"C101"},{"c":"APT1460531","d":"Autopits La Uruca","s":"C101"},{"c":"APT1460731","d":"Otros Gastos Auto Pits Uruca","s":"C101"},{"c":"APT1461531","d":"Autopits Real Cariari","s":"C101"},{"c":"APT2460531","d":"Autopits Escazu","s":"C101"},{"c":"APT3460531","d":"Autopits Santa Ana","s":"C101"},{"c":"APT4460531","d":"Autopits San Pedro","s":"C101"},{"c":"APT5460531","d":"Autopits Alajuela","s":"C101"},{"c":"APT6460531","d":"Autopits Heredia","s":"C101"},{"c":"APT7460531","d":"Autopits Moravia","s":"C101"},{"c":"APT8460531","d":"Autopits Pinares","s":"C101"},{"c":"APT9460531","d":"Autopits San Carlos","s":"C101"},{"c":"APT9460631","d":"Autopits Perez Zeledón","s":"C101"},{"c":"APT9460931","d":"Autopits Guápiles","s":"C101"},{"c":"APT9860531","d":"Autopits Cartago","s":"C101"},{"c":"APT9960531","d":"Autopits Guadalupe","s":"C101"},{"c":"APT9970531","d":"Autopits Desamparados","s":"C101"},{"c":"APT9980531","d":"Autopits La Sabana","s":"C101"},{"c":"C101010100","d":"SERCOR Vehículos La Uruca","s":"C101"},{"c":"C101010104","d":"Gerencia Comercial Taller Uruca","s":"C101"},{"c":"C101010106","d":"Gerencia Comercial Taller El Trigal","s":"C101"},{"c":"C101010200","d":"Trámites País","s":"C101"},{"c":"C101010800","d":"Logística Vehículos País","s":"C101"},{"c":"C101020200","d":"Trámites Barrio México","s":"C101"},{"c":"C101020900","d":"Logística Repuestos País","s":"C101"},{"c":"C101021100","d":"Finanzas - Barrio México","s":"C101"},{"c":"C101040200","d":"Trámites Vehículos Liberia","s":"C101"},{"c":"C101040800","d":"Logística Vehículos Liberia","s":"C101"},{"c":"C101040900","d":"Logística Repuestos Liberia","s":"C101"},{"c":"C101050200","d":"Trámites Vehículos San Carlos","s":"C101"},{"c":"C101050900","d":"Logística Repuestos San Carlos","s":"C101"},{"c":"C101070200","d":"Trámites Vehículos Perez Zeledón","s":"C101"},{"c":"C101070800","d":"Logística Vehículos Perez Zeledón","s":"C101"},{"c":"C101070900","d":"Logística Repuestos Perez Zeledón","s":"C101"},{"c":"C101080200","d":"Trámites Vehículos Santa Ana","s":"C101"},{"c":"C101080800","d":"Logística Vehículos Santa Ana","s":"C101"},{"c":"C101090200","d":"Trámites Vehículos Guápiles","s":"C101"},{"c":"C101090800","d":"Logística Vehículos Guápiles","s":"C101"},{"c":"C101090900","d":"Logística Repuestos Guápiles","s":"C101"},{"c":"C101092000","d":"Servicios Corporativos Integrados SCi","s":"C101"},{"c":"C101093000","d":"Administración y Finanzas","s":"C101"},{"c":"C101095100","d":"Administración & Finanzas Otros","s":"C101"},{"c":"C101097000","d":"Auditoría Interna","s":"C101"},{"c":"C101098001","d":"Mercadeo Relacional Región","s":"C101"},{"c":"C101099100","d":"Publicidad Postventa Repuestos & Taller","s":"C101"},{"c":"C101099301","d":"Logística Vehículos País","s":"C101"},{"c":"C101099304","d":"Logística PA País","s":"C101"},{"c":"C101099305","d":"Logística Bodega Pérez Zeledón","s":"C101"},{"c":"C101099306","d":"Logística PA Las Brisas","s":"C101"},{"c":"C101099307","d":"Logística Autopits","s":"C101"},{"c":"C101099308","d":"Centro de Alistamiento","s":"C101"},{"c":"C101099602","d":"Mercadeo PA País","s":"C101"},{"c":"C101099710","d":"Intereses Financieros - País GQCR","s":"C101"},{"c":"C101099913","d":"IT","s":"C101"},{"c":"C101099917","d":"Créditos y Cobros","s":"C101"},{"c":"C101099921","d":"Gerencia Comercial Rep. País","s":"C101"},{"c":"C101099923","d":"Gerencia Comercial Taller País","s":"C101"},{"c":"C101099925","d":"Gerencia Comercial PA País","s":"C101"},{"c":"C101099926","d":"Costo Corporativo","s":"C101"},{"c":"C101099927","d":"Infraestructura y Mantenimiento","s":"C101"},{"c":"C101099928","d":"Recursos Humanos","s":"C101"},{"c":"C101099930","d":"Regalías","s":"C101"},{"c":"C101099931","d":"Dirección Com Veh Hyundai Región","s":"C101"},{"c":"C101099932","d":"Dirección Com Veh Chevrolet Región","s":"C101"},{"c":"C101099933","d":"Dirección Auditoria Interna Región","s":"C101"},{"c":"C101099934","d":"Dirección IT Región","s":"C101"},{"c":"C101099935","d":"Gestión de la Calidad","s":"C101"},{"c":"C101099937","d":"Atención al Cliente Local","s":"C101"},{"c":"C101099938","d":"Gerencia Comercial Taller Empresarial Pa","s":"C101"},{"c":"C101099939","d":"Gerencia Comercial Autopíts País","s":"C101"},{"c":"C101099940","d":"Gerencia Comercial Rep. Empresarial","s":"C101"},{"c":"C101099941","d":"Gerencia Comercial PA Flotas","s":"C101"},{"c":"C101099942","d":"Gerencia Comercial PA Mayoreo","s":"C101"},{"c":"C101099943","d":"Dirección de Logística Región","s":"C101"},{"c":"C101099944","d":"Compras","s":"C101"},{"c":"C101099945","d":"Experiencia & Gestión de Clientes","s":"C101"},{"c":"C101099950","d":"Gastos Extraordinarios CR","s":"C101"},{"c":"C101099951","d":"Salud Ocupacional RRHH","s":"C101"},{"c":"C101099953","d":"Dirección Com Veh Isuzu Región","s":"C101"},{"c":"C101099954","d":"Dirección PA Región &Repuestos CRC","s":"C101"},{"c":"C101099955","d":"Gerencia de Comercial Taller La Uruca","s":"C101"},{"c":"C101099956","d":"Gerencia Comercial PA Región","s":"C101"},{"c":"C101099957","d":"Atención al Cliente Regional","s":"C101"},{"c":"C101099958","d":"Gerencia Gestión de Inventario Región","s":"C101"},{"c":"C101099961","d":"Proyecto GQ Panamá","s":"C101"},{"c":"C101099963","d":"Servicios Públicos País","s":"C101"},{"c":"C101099966","d":"IT Proyecto SAP","s":"C101"},{"c":"C101099968","d":"Publicidad Regional Proyectos GrupoQ","s":"C101"},{"c":"C101099969","d":"Gerencia Usados Región","s":"C101"},{"c":"C101099970","d":"Recursos Humanos Regional C101","s":"C101"},{"c":"C101099995","d":"Proyecto Motos","s":"C101"},{"c":"C101099996","d":"Direccion comercial PV mercadeo Región","s":"C101"},{"c":"C101100000","d":"Desarrollo proyecto Charlie","s":"C101"},{"c":"C101110200","d":"Trámites Vehículos Del Este","s":"C101"},{"c":"C101110210","d":"Trámites Vehículos Chevy-Isuzu","s":"C101"},{"c":"C101110800","d":"Logística Vehículos Del Este","s":"C101"},{"c":"C101110810","d":"Logística Vehículos Chevy-Isuzu","s":"C101"},{"c":"CAD0110030","d":"Vehículos Nuevos Cadillac La Uruca","s":"C101"},{"c":"CAD0120030","d":"Repuestos Cadillac La Uruca","s":"C101"},{"c":"CAD0130030","d":"Taller Mecánica Cadillac La Uruca","s":"C101"},{"c":"CAD0810030","d":"Vehículos Nuevos Cadillac Santa Ana","s":"C101"},{"c":"CCP10001","d":"Centro Puente Incentivos","s":"C101"},{"c":"CCP10002","d":"Centro puente Ingresos Incent Vehículos","s":"C101"},{"c":"CHE0110030","d":"Vehículos Nuevos Chevrolet La Uruca","s":"C101"},{"c":"CHE0120030","d":"Repuestos Chevrolet Uruca (taller)","s":"C101"},{"c":"CHE0130030","d":"Taller Mecánica Chevrolet La Uruca","s":"C101"},{"c":"CHE0170030","d":"Taller Express Chevrolet La Uruca","s":"C101"},{"c":"CHE0180030","d":"Taller Flotas Chevrolet El Trigal","s":"C101"},{"c":"CHE0190030","d":"Taller Express Flotas Chevrolet Trigal","s":"C101"},{"c":"CHE0200030","d":"Repuestos Chevrolet Trigal","s":"C101"},{"c":"CHE0220030","d":"Repuestos Chevrolet Barrio México","s":"C101"},{"c":"CHE0410030","d":"Vehículos Nuevos Chevrolet Liberia","s":"C101"},{"c":"CHE0420030","d":"Repuestos Chevrolet Liberia","s":"C101"},{"c":"CHE0430030","d":"Taller Mecánica Chevrolet Liberia","s":"C101"},{"c":"CHE0510030","d":"Vehículos Nuevos Chevrolet San Carlos","s":"C101"},{"c":"CHE0520030","d":"Repuestos Chevrolet San Carlos","s":"C101"},{"c":"CHE0530030","d":"Taller Mecánica Chevrolet San Carlos","s":"C101"},{"c":"CHE0610030","d":"Vehículos Nuevos Chevrolet Perez Zeledón","s":"C101"},{"c":"CHE0710030","d":"Vehículos Nuevos Chevrolet Guápiles","s":"C101"},{"c":"CHE0810030","d":"Vehículos Nuevos Chevrolet Santa Ana","s":"C101"},{"c":"CHE1110030","d":"Vehículos Nuevos Chevrolet del Este","s":"C101"},{"c":"CHE1130030","d":"Taller Mecánica Chevrolet del Este","s":"C101"},{"c":"CHE1150030","d":"Taller Express Chevrolet del Este","s":"C101"},{"c":"CHE1210010","d":"Vehículos Nuevos Chevrolet Tegucigalpa","s":"C101"},{"c":"CHE2130030","d":"Repuestos Chevrolet Perez Zeledón","s":"C101"},{"c":"CHE2140030","d":"Taller Mecánica Chevrolet Perez Zeledón","s":"C101"},{"c":"CHE2150030","d":"Repuestos Chevrolet Guápiles","s":"C101"},{"c":"CHE2160030","d":"Taller Mecánica Chevrolet Guápiles","s":"C101"},{"c":"CTC1360531","d":"Cuentas Claves Las Brisas","s":"C101"},{"c":"CTC2360531","d":"Cuentas Claves Barrio México","s":"C101"},{"c":"DFE0220030","d":"Repuestos DongFeng Barrio México","s":"C101"},{"c":"DIS1360531","d":"Clientes Distribuidores Las Brisas","s":"C101"},{"c":"FLT1360531","d":"Flotas Las Brisas","s":"C101"},{"c":"FLT2360531","d":"Flotas Barrio México","s":"C101"},{"c":"FLT3360531","d":"Flotas Bodega Pérez Zeledón","s":"C101"},{"c":"FLT5360531","d":"Flotas Bodega San Carlos","s":"C101"},{"c":"HYU0110030","d":"Vehículos Nuevos Hyundai La Uruca","s":"C101"},{"c":"HYU0120030","d":"Repuestos Hyundai La Uruca( taller)","s":"C101"},{"c":"HYU0130030","d":"Taller Mecánica Hyundai La Uruca","s":"C101"},{"c":"HYU0170030","d":"Taller Express Hyundai La Uruca","s":"C101"},{"c":"HYU0180030","d":"Taller Flotas Hyundai El Trigal","s":"C101"},{"c":"HYU0190030","d":"Taller Express Flotas Hyundai El trigal","s":"C101"},{"c":"HYU0200030","d":"Repuestos Hyundai Trigal","s":"C101"},{"c":"HYU0220030","d":"Repuestos Hyundai Barrio México","s":"C101"},{"c":"HYU0410030","d":"Vehículos Nuevos Hyundai Liberia","s":"C101"},{"c":"HYU0420030","d":"Repuestos Hyundai Liberia","s":"C101"},{"c":"HYU0430030","d":"Taller Mecánica Hyundai Liberia","s":"C101"},{"c":"HYU0510030","d":"Vehículos Nuevos Hyundai San Carlos","s":"C101"},{"c":"HYU0520030","d":"Repuestos Hyundai San Carlos","s":"C101"},{"c":"HYU0530030","d":"Taller Mecánica Hyundai San Carlos","s":"C101"},{"c":"HYU0810030","d":"Vehiculos Nuevos Hyundai Santa Ana","s":"C101"},{"c":"HYU1110030","d":"Vehículos Nuevos Hyundai del Este","s":"C101"},{"c":"HYU1130030","d":"Taller Mecánica Hyundai del Este","s":"C101"},{"c":"HYU2120030","d":"Vehículos Nuevos Hyundai Perez Zeledón","s":"C101"},{"c":"HYU2130030","d":"Repuestos Hyundai Perez Zeledón","s":"C101"},{"c":"HYU2140030","d":"Taller Mecánica Hyundai Perez Zeledón","s":"C101"},{"c":"HYU2150030","d":"Vehículos Nuevos Hyundai Guápiles","s":"C101"},{"c":"HYU2160030","d":"Repuestos Hyundai Guápiles","s":"C101"},{"c":"HYU2170030","d":"Taller Mecánica Hyundai Guápiles","s":"C101"},{"c":"HYU2180030","d":"Vehículos Nuevos Hyundai Citi Mall","s":"C101"},{"c":"ISU0110030","d":"Vehículos Nuevos Isuzu La Uruca","s":"C101"},{"c":"ISU0120030","d":"Repuestos Isuzu La Uruca( taller)","s":"C101"},{"c":"ISU0130030","d":"Taller Mecánica Isuzu La Uruca","s":"C101"},{"c":"ISU0170030","d":"Taller Express Isuzu La Uruca","s":"C101"},{"c":"ISU0180030","d":"Taller Flotas Isuzu El trigal","s":"C101"},{"c":"ISU0190030","d":"Taller Express Flotas Isuzu El trigal","s":"C101"},{"c":"ISU0200030","d":"Repuestos Isuzu Trigal","s":"C101"},{"c":"ISU0220030","d":"Repuestos Isuzu Barrio México","s":"C101"},{"c":"ISU0410030","d":"Vehículos Nuevos Isuzu Liberia","s":"C101"},{"c":"ISU0420030","d":"Repuestos Isuzu Liberia","s":"C101"},{"c":"ISU0430030","d":"Taller Mecánica Isuzu Liberia","s":"C101"},{"c":"ISU0510030","d":"Vehículos Nuevos Isuzu San Carlos","s":"C101"},{"c":"ISU0520030","d":"Repuestos Isuzu San Carlos","s":"C101"},{"c":"ISU0530030","d":"Taller Mecánica Isuzu San Carlos","s":"C101"},{"c":"ISU0610030","d":"Vehículos Nuevos Isuzu Perez Zeledón","s":"C101"},{"c":"ISU0710030","d":"Vehículos Nuevos Isuzu Guápiles","s":"C101"},{"c":"ISU1110030","d":"Vehículos Nuevos Isuzu del Este","s":"C101"},{"c":"ISU1130030","d":"Taller Mecánica Isuzu del Este","s":"C101"},{"c":"ISU2130030","d":"Repuestos Isuzu Perez Zeledón","s":"C101"},{"c":"ISU2140030","d":"Taller Mecánica Isuzu Perez Zeledón","s":"C101"},{"c":"ISU2150030","d":"Repuestos Isuzu Guápiles","s":"C101"},{"c":"ISU2160030","d":"Taller Mecánica Isuzu Guápiles","s":"C101"},{"c":"MAY1360531","d":"Mayoreo Las Brisas","s":"C101"},{"c":"MAY2360531","d":"Mayoreo Barrio México","s":"C101"},{"c":"MAY3360531","d":"Mayoreo Bodega Pérez Zeledón","s":"C101"},{"c":"MAY5360531","d":"Mayoreo Bodega San Carlos","s":"C101"},{"c":"NIS1210010","d":"Vehículos Nuevos Nissan Tegucigalpa","s":"C101"},{"c":"OTR0110030","d":"Vehículos Usados La Uruca","s":"C101"},{"c":"OTR0120030","d":"Repuestos Varios La Uruca (taller)","s":"C101"},{"c":"OTR0130030","d":"Taller Mecánica Varios La Uruca","s":"C101"},{"c":"OTR0150030","d":"Otros Egresos La Uruca (Bloq)","s":"C101"},{"c":"OTR0170030","d":"Taller Express Varios La uruca","s":"C101"},{"c":"OTR0180030","d":"Taller Sector Empresarial Varios Trigal","s":"C101"},{"c":"OTR0190030","d":"Taller Express Flotas Varios - La Uruca","s":"C101"},{"c":"OTR0200030","d":"Repuestos Varios Trigal","s":"C101"},{"c":"OTR0220030","d":"Repuestos Varios Barrio México","s":"C101"},{"c":"OTR0270030","d":"Atención al Cliente Local","s":"C101"},{"c":"OTR0280030","d":"IT BARRIO MEXICO","s":"C101"},{"c":"OTR0290030","d":"Administración & Finanzas CQ","s":"C101"},{"c":"OTR0310030","d":"Vehiculos Usados Guápiles","s":"C101"},{"c":"OTR0420030","d":"Repuestos Varios Liberia","s":"C101"},{"c":"OTR0510030","d":"Vehiculos Usados Tibas","s":"C101"},{"c":"OTR0520030","d":"Repuestos Varios San Carlos","s":"C101"},{"c":"OTR1130030","d":"Taller Mecánica Varios del Este","s":"C101"},{"c":"OTR1350031","d":"Otros Gastos Bodega DHL","s":"C101"},{"c":"OTR1900030","d":"Taller Pintura El Trigal","s":"C101"},{"c":"OTR210030","d":"Vehículos Usados Pérez Zeledón","s":"C101"},{"c":"OTR2130030","d":"Repuestos Varios Perez Zeledón","s":"C101"},{"c":"OTR2140030","d":"Repuestos Varios Guápiles","s":"C101"},{"c":"OTR2350031","d":"Otros Gastos Suc. Barrio Mexico","s":"C101"},{"c":"TAMV190300","d":"Taller Mecánica Varios La Sabana","s":"C101"},{"c":"YMH0220030","d":"Repuestos Yamaha Barrio México","s":"C101"},{"c":"YMH0280030","d":"Motores Yamaha Barrio México(Bloquead)","s":"C101"},{"c":"ACT018403","d":"Lubricantes Action País","s":"C105"},{"c":"AMCP1001","d":"Centro Puente Active Motors Costa Rica","s":"C105"},{"c":"APTV100100","d":"Autopits TVS Uruca","s":"C105"},{"c":"APTV110100","d":"Autopits TVS Pinares","s":"C105"},{"c":"APTV120100","d":"Autopits TVS Cartago","s":"C105"},{"c":"APTV130100","d":"Autopits TVS Moravia","s":"C105"},{"c":"APTV140100","d":"Autopits TVS Perez Zeledón","s":"C105"},{"c":"APTV150010","d":"Autopits TVS San Carlos","s":"C105"},{"c":"APTV150100","d":"Autopits TVS Guápiles","s":"C105"},{"c":"APTV170100","d":"Autopits TVS Guadalupe","s":"C105"},{"c":"APTV180100","d":"Autopits TVS Desamparados","s":"C105"},{"c":"APTV190100","d":"Autopits TVS Sabana","s":"C105"},{"c":"APTV200100","d":"Autopits TVS Real Cariari","s":"C105"},{"c":"APTV300100","d":"Autopits TVS Escazú","s":"C105"},{"c":"APTV400100","d":"Autopits TVS Liberia","s":"C105"},{"c":"APTV600100","d":"Autopits TVS San Pedro","s":"C105"},{"c":"APTV700100","d":"Autopits TVS Alajuela","s":"C105"},{"c":"APTV800100","d":"Autopits TVS Santa Ana","s":"C105"},{"c":"APTV900100","d":"Autopits TVS Heredia","s":"C105"},{"c":"APVN100100","d":"Autopits VENTO Uruca","s":"C105"},{"c":"APVN110100","d":"Autopits VENTO Pinares","s":"C105"},{"c":"APVN120100","d":"Autopits VENTO Cartago","s":"C105"},{"c":"APVN130100","d":"Autopits VENTO Moravia","s":"C105"},{"c":"APVN140100","d":"Autopits VENTO Perez Zeledón","s":"C105"},{"c":"APVN150100","d":"Autopits VENTO Guápiles","s":"C105"},{"c":"APVN180100","d":"Autopits VENTO Desamparados","s":"C105"},{"c":"APVN190100","d":"Autopits VENTO Sabana","s":"C105"},{"c":"APVN200100","d":"Autopits VENTO Real Cariari","s":"C105"},{"c":"APVN300100","d":"Autopits VENTO Escazú","s":"C105"},{"c":"APVN400100","d":"Autopits VENTO Liberia","s":"C105"},{"c":"APVN500100","d":"Autopits VENTO San Carlos","s":"C105"},{"c":"APVN600100","d":"Autopits VENTO San Pedro","s":"C105"},{"c":"APVN700100","d":"Autopits VENTO Alajuela","s":"C105"},{"c":"APVN800100","d":"Autopits VENTO Santa Ana","s":"C105"},{"c":"APVN900100","d":"Autopits VENTO Heredia","s":"C105"},{"c":"ARC0170100","d":"Vehículos Nuevos ARCFOX La Uruca","s":"C105"},{"c":"ARC0170200","d":"Repuestos ARCFOX La Uruca","s":"C105"},{"c":"ARC0170300","d":"Taller Mecánica ARCFOX La Uruca","s":"C105"},{"c":"ARC0210100","d":"Vehículos Nuevos ARCFOX Santa Ana","s":"C105"},{"c":"C105090000","d":"IT","s":"C105"},{"c":"C105091000","d":"Logística Motos País","s":"C105"},{"c":"C105092000","d":"Logística Repuestos","s":"C105"},{"c":"C105093000","d":"Administración y Finanzas","s":"C105"},{"c":"C105094000","d":"Centro Alistamiento CDA","s":"C105"},{"c":"C105095000","d":"Logística Vehículos País","s":"C105"},{"c":"C105096000","d":"Recursos Humanos","s":"C105"},{"c":"C105097000","d":"Clientes Distribuidores Las Brisas","s":"C105"},{"c":"C105098000","d":"Servicios Públicos País","s":"C105"},{"c":"C105099000","d":"Mercadeo Relacional Región","s":"C105"},{"c":"C105099710","d":"Intereses Financieros País AM CRC","s":"C105"},{"c":"C105099938","d":"Publicidad Regional Proyectos GrupoQ","s":"C105"},{"c":"C105099939","d":"Dirección Com Veh Greatwall Región","s":"C105"},{"c":"C105AMREG","d":"Centro de Regalias","s":"C105"},{"c":"FRL0110111","d":"Vehículos Nuevos Forland Trigal","s":"C105"},{"c":"FRL0110211","d":"Repuestos Forland Las Brisas","s":"C105"},{"c":"FRL0110311","d":"Taller Mecánica Forland El Trigal","s":"C105"},{"c":"FRL0130111","d":"Vehículos Nuevos Forland Liberia","s":"C105"},{"c":"FRL0130112","d":"Repuestos  Forland Liberia","s":"C105"},{"c":"FRL0130113","d":"Taller Mecánica Forland Liberia","s":"C105"},{"c":"FRL0140111","d":"Vehículos Nuevos Forland Perez Zeledon","s":"C105"},{"c":"FRL0140112","d":"Repuestos Forland Perez Zeledon","s":"C105"},{"c":"FRL0140113","d":"Taller Mecánica Forland Perez Zeledon","s":"C105"},{"c":"FRL0150111","d":"Vehículos Nuevos Forland San Carlos","s":"C105"},{"c":"FRL0150112","d":"Repuestos Forland San Carlos","s":"C105"},{"c":"FRL0150113","d":"Taller Mecánica Forland San Carlos","s":"C105"},{"c":"FRL0160111","d":"Vehículos Nuevos Forland Guápiles","s":"C105"},{"c":"FRL0160112","d":"Repuestos Forland Guapiles","s":"C105"},{"c":"FRL0160113","d":"Taller Mecánica Forland Guapiles","s":"C105"},{"c":"FRL0190100","d":"Vehículos Nuevos Forland El Trigal","s":"C105"},{"c":"GRW0170100","d":"Vehículos Nuevos GWM La Uruca","s":"C105"},{"c":"GRW0170200","d":"Repuestos Greatwall La Uruca","s":"C105"},{"c":"GRW0170300","d":"Taller Mecánica Greatwall La Uruca","s":"C105"},{"c":"GRW0210100","d":"Vehículos Nuevos GWM Santa Ana","s":"C105"},{"c":"OTR0110200","d":"Repuestos Varios Las Brisas","s":"C105"},{"c":"OTR0120200","d":"Repuestos Varios Distribuidores Sucursal","s":"C105"},{"c":"OTR0130200","d":"Repuestos Varios  Liberia","s":"C105"},{"c":"OTR0140200","d":"Repuestos Varios  Perez Zeledon","s":"C105"},{"c":"OTR0150200","d":"Repuestos Varios  San Carlos","s":"C105"},{"c":"OTR0160200","d":"Repuestos Varios  Guapiles","s":"C105"},{"c":"PC105000","d":"Otros Ingresos/Egresos País","s":"C105"},{"c":"REP190200","d":"Repuestos Varios La Sabana","s":"C105"},{"c":"TVS0020100","d":"Motos TVS Paseo Las Flores","s":"C105"},{"c":"TVS0110100","d":"Motos TVS La Sabana","s":"C105"},{"c":"TVS0110200","d":"Repuestos TVS Las Brisas","s":"C105"},{"c":"TVS0110300","d":"Taller Mecánica TVS La Sabana","s":"C105"},{"c":"TVS0120100","d":"Motos TVS Distribuidores La Sabana","s":"C105"},{"c":"TVS0120200","d":"Repuestos TVS Distribuidores Las Brisas","s":"C105"},{"c":"TVS0130100","d":"Motos TVS  Liberia","s":"C105"},{"c":"TVS0130200","d":"Repuestos TVS  Liberia","s":"C105"},{"c":"TVS0130300","d":"Taller Mecánica TVS  Liberia","s":"C105"},{"c":"TVS0140100","d":"Motos TVS  Perez Zeledon","s":"C105"},{"c":"TVS0140200","d":"Repuestos TVS  Perez Zeledon","s":"C105"},{"c":"TVS0140300","d":"Taller Mecánica TVS  Perez Zeledon","s":"C105"},{"c":"TVS0150100","d":"Motos TVS  San Carlos","s":"C105"},{"c":"TVS0150200","d":"Repuestos TVS  San Carlos","s":"C105"},{"c":"TVS0150300","d":"Taller Mecánica TVS  San Carlos","s":"C105"},{"c":"TVS0160100","d":"Motos TVS  Guapiles","s":"C105"},{"c":"TVS0160200","d":"Repuestos TVS  Guapiles","s":"C105"},{"c":"TVS0160300","d":"Taller Mecánica TVS  Guapiles","s":"C105"},{"c":"TVS0900200","d":"Repuestos TVS Barrio Mexico","s":"C105"},{"c":"VNT0020100","d":"Motos VENTO Paseo Las Flores","s":"C105"},{"c":"VNT0110100","d":"Motos Vento La Sabana","s":"C105"},{"c":"VNT0110200","d":"Repuestos Vento Las Brisas","s":"C105"},{"c":"VNT0110300","d":"Taller Mecánica Vento La Sabana","s":"C105"},{"c":"VNT0120100","d":"Motos Vento Distribuidores La Sabana","s":"C105"},{"c":"VNT0120200","d":"Repuestos VENTO Distribuidores Sucursal","s":"C105"},{"c":"VNT0130100","d":"Motos Vento  Liberia","s":"C105"},{"c":"VNT0130200","d":"Repuestos  VENTO Liberia","s":"C105"},{"c":"VNT0130300","d":"Taller Mecánica VENTO  Liberia","s":"C105"},{"c":"VNT0140100","d":"Motos Vento Perez Zeledon","s":"C105"},{"c":"VNT0140200","d":"Repuestos  VENTO Perez Zeledon","s":"C105"},{"c":"VNT0140300","d":"Taller Mecánica VENTO  Perez Zeledon","s":"C105"},{"c":"VNT0150100","d":"Motos Vento San Carlos","s":"C105"},{"c":"VNT0150200","d":"Repuestos  VENTO San Carlos","s":"C105"},{"c":"VNT0150300","d":"Taller Mecánica VENTO  San Carlos","s":"C105"},{"c":"VNT0160100","d":"Motos Vento Guapiles","s":"C105"},{"c":"VNT0160200","d":"Repuestos  VENTO Guapiles","s":"C105"},{"c":"VNT0160300","d":"Taller Mecánica VENTO  Guapiles","s":"C105"},{"c":"VNT0900200","d":"Repuestos Vento Barrio Mexico","s":"C105"}],
+  cuentas: [{"c":"6101110100","d":"Sueldos Y Salarios Permanente","s":"C101"},{"c":"6101110200","d":"Horas Extras","s":"C101"},{"c":"6101110300","d":"Comisiones sobre Ventas","s":"C101"},{"c":"6101110400","d":"Bonificaciones","s":"C101"},{"c":"6101110500","d":"Gratificaciones","s":"C101"},{"c":"6101110600","d":"Comisión a terceros","s":"C101"},{"c":"6101120100","d":"Seguro Medico Hospitalario","s":"C101"},{"c":"6101120200","d":"Atenciones Y Festejos","s":"C101"},{"c":"6101120400","d":"Aguinaldo","s":"C101"},{"c":"6101120700","d":"Seguro Colectivo De Vida","s":"C101"},{"c":"6101120800","d":"Uniformes","s":"C101"},{"c":"6101120900","d":"Asistencia Social","s":"C101"},{"c":"6101121100","d":"Alimentación Y Transporte","s":"C101"},{"c":"6101121300","d":"Capacitaciones Al Personal","s":"C101"},{"c":"6101121310","d":"Actividades Adicionales con el personal","s":"C101"},{"c":"6101121400","d":"Compras E Insumos De Cafetería","s":"C101"},{"c":"6101121500","d":"Gastos de Representación","s":"C101"},{"c":"6101121800","d":"Salud ocupacional","s":"C101"},{"c":"6101130100","d":"Prestaciones e Indemnizaciones","s":"C101"},{"c":"6101130200","d":"Seguridad social","s":"C101"},{"c":"6101210100","d":"Papelería y útiles de oficina","s":"C101"},{"c":"6101210200","d":"Catálogos y manuales","s":"C101"},{"c":"6101220100","d":"Materiales y útiles de aseo","s":"C101"},{"c":"6101220200","d":"Materiales de empaque","s":"C101"},{"c":"6101220300","d":"Materiales diversos","s":"C101"},{"c":"6101230100","d":"Combustible, Lubricantes y Depreciaciones","s":"C101"},{"c":"6101230200","d":"Reparaciones y mantenimiento de Vehículos (OT)","s":"C101"},{"c":"6101240100","d":"Mantenimiento de edificios e instalaciones","s":"C101"},{"c":"6101240300","d":"Mantenimiento equipo taller","s":"C101"},{"c":"6101240600","d":"Reparaciones y mantenimiento vehiculos","s":"C101"},{"c":"6101240700","d":"Mantenimiento de Mobiliario y equipo","s":"C101"},{"c":"6101240800","d":"Mantenimiento de equipo de computo","s":"C101"},{"c":"6101241000","d":"Faltantes en inventarios","s":"C101"},{"c":"6101241100","d":"Suministros de Taller","s":"C101"},{"c":"6101241110","d":"Suministros de Taller (OT)","s":"C101"},{"c":"6101310100","d":"Alquiler de edificio","s":"C101"},{"c":"6101310500","d":"Alquiler de edificio proporcion variable","s":"C101"},{"c":"6101310510","d":"Alquiler de edificios corto plazo","s":"C101"},{"c":"6101310520","d":"Alquiler de Equipo corto plazo","s":"C101"},{"c":"6101310530","d":"Alquiler de Maquinaria corto plazo","s":"C101"},{"c":"6101310540","d":"Alquiler de Vehículo corto plazo","s":"C101"},{"c":"6101320100","d":"Servicio de seguridad","s":"C101"},{"c":"6101320200","d":"Servicio de limpieza y mantenimiento","s":"C101"},{"c":"6101320210","d":"Servicios de recoleccion de basura y desechos","s":"C101"},{"c":"6101320300","d":"Servicio de mensajería","s":"C101"},{"c":"6101320400","d":"Otros servic. Subcontratados","s":"C101"},{"c":"6101320430","d":"Personal Outsourcing","s":"C101"},{"c":"6101320700","d":"Otros servicios externos","s":"C101"},{"c":"6101320710","d":"Regalias por uso de Licencias y Marcas","s":"C101"},{"c":"6101330100","d":"Honorarios Legales","s":"C101"},{"c":"6101330200","d":"Honorarios de auditoría externa","s":"C101"},{"c":"6101330210","d":"Otros Honorarios N","s":"C101"},{"c":"6101330300","d":"Otros honorarios","s":"C101"},{"c":"6101340100","d":"Mantenimiento Maquinaria y Herramientas","s":"C101"},{"c":"6101340131","d":"Servicios mantenimiento compañias relacionadas","s":"C101"},{"c":"6101340200","d":"Mantenimiento software","s":"C101"},{"c":"6101340210","d":"Mantenimiento software (IT)","s":"C101"},{"c":"6101340300","d":"Comunicaciones ( Internet)","s":"C101"},{"c":"6101340500","d":"Servicios Hosting","s":"C101"},{"c":"6101350100","d":"Teléfono","s":"C101"},{"c":"6101350101","d":"Teléfono Móvil","s":"C101"},{"c":"6101350200","d":"Energía eléctrica","s":"C101"},{"c":"6101350300","d":"Agua","s":"C101"},{"c":"6101350320","d":"Servicios publicos compañias relacionadas","s":"C101"},{"c":"6101350500","d":"Suscripciones oficiales","s":"C101"},{"c":"6101360100","d":"Seguros incendios","s":"C101"},{"c":"6101360300","d":"Seguro de vehículos en piso","s":"C101"},{"c":"6101360500","d":"Seguros vehículos de la compañía","s":"C101"},{"c":"6101360800","d":"Seguro crimen y fidelidad","s":"C101"},{"c":"6101370100","d":"Flete, transporte expreso y embalaje","s":"C101"},{"c":"6101370300","d":"Peajes","s":"C101"},{"c":"6101380100","d":"Producción","s":"C101"},{"c":"6101380200","d":"Medios","s":"C101"},{"c":"6101380211","d":"Prensa","s":"C101"},{"c":"6101380220","d":"Radio","s":"C101"},{"c":"6101380230","d":"Televisión","s":"C101"},{"c":"6101380250","d":"Digital","s":"C101"},{"c":"6101380260","d":"Outdoors","s":"C101"},{"c":"6101380270","d":"Fees de Agencias","s":"C101"},{"c":"6101380290","d":"Fees Digital de Agencias","s":"C101"},{"c":"6101380300","d":"BTL ( Below the line )","s":"C101"},{"c":"6101380500","d":"Estudios de investigación de mercado","s":"C101"},{"c":"6101380700","d":"Suscripciones","s":"C101"},{"c":"6101380800","d":"CRM (Customer Relationship Management)","s":"C101"},{"c":"6101380900","d":"Promocion del Mes","s":"C101"},{"c":"6101380910","d":"Promocion del mes Vehiculos-tasa","s":"C101"},{"c":"6101380911","d":"Activación","s":"C101"},{"c":"6101380912","d":"Artículos Promocionales","s":"C101"},{"c":"6101380913","d":"Patrocinio eventos","s":"C101"},{"c":"6101380930","d":"Promociones articulos PA","s":"C101"},{"c":"6101410100","d":"Pasajes e Impuestos de viaje al exterior","s":"C101"},{"c":"6101410200","d":"Hospedaje y alimentación al exterior","s":"C101"},{"c":"6101420100","d":"Pasajes e Impuestos de viaje en el interior","s":"C101"},{"c":"6101420200","d":"Hospedaje y alimentación en el interior","s":"C101"},{"c":"6101420300","d":"Otros Gastos de viaje en el interior","s":"C101"},{"c":"6101501010","d":"Depreciación Edificios e instalaciones","s":"C101"},{"c":"6101501020","d":"Depreciación Equipo de computo","s":"C101"},{"c":"6101501030","d":"Depreciación Equipo diversos","s":"C101"},{"c":"6101501040","d":"Depreciación Herramientas","s":"C101"},{"c":"6101501050","d":"Depreciación Maquinaria","s":"C101"},{"c":"6101501060","d":"Depreciación Mejoras en propiedades arrendadas","s":"C101"},{"c":"6101501070","d":"Depreciación Mobiliario y equipo","s":"C101"},{"c":"6101501080","d":"Depreciación Rotulos publicitarios","s":"C101"},{"c":"6101501090","d":"Depreciación Vehiculos","s":"C101"},{"c":"6101501110","d":"Depreciación revalúos edificios","s":"C101"},{"c":"6101501261","d":"Depreciación Activo derecho uso Edificios(M)","s":"C101"},{"c":"6101502020","d":"Amortización Software","s":"C101"},{"c":"6101602010","d":"Obsolescencia de inventarios","s":"C101"},{"c":"6101602030","d":"Obsolescencia de inventarios PA","s":"C101"},{"c":"6101701000","d":"Matrículas y traspasos","s":"C101"},{"c":"6101702000","d":"Demostración y gastos de entrega","s":"C101"},{"c":"6101703000","d":"Trabajos de limpieza de vehículos","s":"C101"},{"c":"6101704000","d":"Revisiones de vehículos OT","s":"C101"},{"c":"6101801010","d":"Impuestos Localidades","s":"C101"},{"c":"6101901000","d":"Impuesto sobre la renta","s":"C101"},{"c":"6102101020","d":"Gtías de Fábrica Rechazadas","s":"C101"},{"c":"6102101030","d":"Garantías de fábrica diferencias","s":"C101"},{"c":"6102103000","d":"Garantías de Taller (OT)","s":"C101"},{"c":"6102103010","d":"Garantías de Taller Manual","s":"C101"},{"c":"6102104000","d":"Gastos Garantía Vehiculos usados OT","s":"C101"},{"c":"6102105000","d":"Garantía Productos Automotrices (OT)","s":"C101"},{"c":"6102106000","d":"Defensoría-Garantia Vehículos","s":"C101"},{"c":"6102107000","d":"Gtía Cliente GWCEX (OT)","s":"C101"},{"c":"6102108000","d":"Garantía extendida - Vehículos","s":"C101"},{"c":"6102201000","d":"Almacenajes","s":"C101"},{"c":"6102205000","d":"Atenciones a Clientes","s":"C101"},{"c":"6102206000","d":"Reclamos no aceptados","s":"C101"},{"c":"6103020000","d":"Gastos no Deducibles","s":"C101"},{"c":"6103020010","d":"Retenciones no deducibles","s":"C101"},{"c":"6103020030","d":"Garantias-impuesto no deducible","s":"C101"},{"c":"6103050000","d":"Gatos de Licitaciones","s":"C101"},{"c":"6103060000","d":"Multas","s":"C101"},{"c":"6103090000","d":"Otros Gastos","s":"C101"},{"c":"6103100000","d":"Gastos de Activos no Depreciables","s":"C101"},{"c":"6103110000","d":"Materiales menores de taller","s":"C101"},{"c":"6103110010","d":"Ordenes de taller caja chica","s":"C101"},{"c":"6101110100","d":"Sueldos Y Salarios Permanente","s":"C105"},{"c":"6101110200","d":"Horas Extras","s":"C105"},{"c":"6101110300","d":"Comisiones sobre Ventas","s":"C105"},{"c":"6101110400","d":"Bonificaciones","s":"C105"},{"c":"6101110500","d":"Gratificaciones","s":"C105"},{"c":"6101110660","d":"Comisión a Terceros Motos","s":"C105"},{"c":"6101110670","d":"Comisión Motos Cias. Relacionadas","s":"C105"},{"c":"6101120100","d":"Seguro Medico Hospitalario","s":"C105"},{"c":"6101120200","d":"Atenciones Y Festejos","s":"C105"},{"c":"6101120400","d":"Aguinaldo","s":"C105"},{"c":"6101120700","d":"Seguro Colectivo De Vida","s":"C105"},{"c":"6101120800","d":"Uniformes","s":"C105"},{"c":"6101120900","d":"Asistencia Social","s":"C105"},{"c":"6101121100","d":"Alimentación Y Transporte","s":"C105"},{"c":"6101121300","d":"Capacitaciones Al Personal","s":"C105"},{"c":"6101121400","d":"Compras E Insumos De Cafetería","s":"C105"},{"c":"6101130100","d":"Prestaciones e Indemnizaciones","s":"C105"},{"c":"6101130200","d":"Seguridad social","s":"C105"},{"c":"6101210100","d":"Papelería y útiles de oficina","s":"C105"},{"c":"6101210200","d":"Catálogos y manuales","s":"C105"},{"c":"6101220100","d":"Materiales y útiles de aseo","s":"C105"},{"c":"6101220300","d":"Materiales diversos","s":"C105"},{"c":"6101230100","d":"Combustible, Lubricantes y Depreciaciones","s":"C105"},{"c":"6101230200","d":"Reparaciones y mantenimiento de Vehículos (OT)","s":"C105"},{"c":"6101240100","d":"Mantenimiento de edificios e instalaciones","s":"C105"},{"c":"6101240600","d":"Reparaciones y mantenimiento vehiculos","s":"C105"},{"c":"6101241100","d":"Suministros de Taller","s":"C105"},{"c":"6101310100","d":"Alquiler de edificio","s":"C105"},{"c":"6101310400","d":"Arrendamientos Compañias relacionadas","s":"C105"},{"c":"6101310520","d":"Alquiler de Equipo corto plazo","s":"C105"},{"c":"6101320100","d":"Servicio de seguridad","s":"C105"},{"c":"6101320200","d":"Servicio de limpieza y mantenimiento","s":"C105"},{"c":"6101320400","d":"Otros servic. Subcontratados","s":"C105"},{"c":"6101320430","d":"Personal Outsourcing","s":"C105"},{"c":"6101320710","d":"Regalias por uso de Licencias y Marcas","s":"C105"},{"c":"6101330100","d":"Honorarios Legales","s":"C105"},{"c":"6101330200","d":"Honorarios de auditoría externa","s":"C105"},{"c":"6101330300","d":"Otros honorarios","s":"C105"},{"c":"6101340200","d":"Mantenimiento software","s":"C105"},{"c":"6101340300","d":"Comunicaciones ( Internet)","s":"C105"},{"c":"6101350100","d":"Teléfono","s":"C105"},{"c":"6101350101","d":"Teléfono Móvil","s":"C105"},{"c":"6101350200","d":"Energía eléctrica","s":"C105"},{"c":"6101350300","d":"Agua","s":"C105"},{"c":"6101350500","d":"Suscripciones oficiales","s":"C105"},{"c":"6101360100","d":"Seguros incendios","s":"C105"},{"c":"6101360300","d":"Seguro de vehículos en piso","s":"C105"},{"c":"6101360500","d":"Seguros vehículos de la compañía","s":"C105"},{"c":"6101360800","d":"Seguro crimen y fidelidad","s":"C105"},{"c":"6101370300","d":"Peajes","s":"C105"},{"c":"6101380100","d":"Producción","s":"C105"},{"c":"6101380200","d":"Medios","s":"C105"},{"c":"6101380220","d":"Radio","s":"C105"},{"c":"6101380250","d":"Digital","s":"C105"},{"c":"6101380260","d":"Outdoors","s":"C105"},{"c":"6101380270","d":"Fees de Agencias","s":"C105"},{"c":"6101380290","d":"Fees Digital de Agencias","s":"C105"},{"c":"6101380300","d":"BTL ( Below the line )","s":"C105"},{"c":"6101380500","d":"Estudios de investigación de mercado","s":"C105"},{"c":"6101380700","d":"Suscripciones","s":"C105"},{"c":"6101380800","d":"CRM (Customer Relationship Management)","s":"C105"},{"c":"6101380912","d":"Artículos Promocionales","s":"C105"},{"c":"6101380913","d":"Patrocinio eventos","s":"C105"},{"c":"6101410100","d":"Pasajes e Impuestos de viaje al exterior","s":"C105"},{"c":"6101410200","d":"Hospedaje y alimentación al exterior","s":"C105"},{"c":"6101420100","d":"Pasajes e Impuestos de viaje en el interior","s":"C105"},{"c":"6101420200","d":"Hospedaje y alimentación en el interior","s":"C105"},{"c":"6101501020","d":"Depreciación Equipo de computo","s":"C105"},{"c":"6101501030","d":"Depreciación Equipo diversos","s":"C105"},{"c":"6101501040","d":"Depreciación Herramientas","s":"C105"},{"c":"6101501050","d":"Depreciación Maquinaria","s":"C105"},{"c":"6101501060","d":"Depreciación Mejoras en propiedades arrendadas","s":"C105"},{"c":"6101501070","d":"Depreciación Mobiliario y equipo","s":"C105"},{"c":"6101501080","d":"Depreciación Rotulos publicitarios","s":"C105"},{"c":"6101501090","d":"Depreciación Vehiculos","s":"C105"},{"c":"6101501261","d":"Depreciación Activo derecho uso Edificios(M)","s":"C105"},{"c":"6101502020","d":"Amortización Software","s":"C105"},{"c":"6101701000","d":"Matrículas y traspasos","s":"C105"},{"c":"6101702000","d":"Demostración y gastos de entrega","s":"C105"},{"c":"6101703000","d":"Trabajos de limpieza de vehículos","s":"C105"},{"c":"6101704000","d":"Revisiones de vehículos OT","s":"C105"},{"c":"6101704020","d":"Revisiones y servicios motos (OT)","s":"C105"},{"c":"6101801010","d":"Impuestos Localidades","s":"C105"},{"c":"6102101030","d":"Garantías de fábrica diferencias","s":"C105"},{"c":"6102103000","d":"Garantías de Taller (OT)","s":"C105"},{"c":"6102103010","d":"Garantías de Taller Manual","s":"C105"},{"c":"6102106000","d":"Defensoría-Garantia Vehículos","s":"C105"},{"c":"6102201000","d":"Almacenajes","s":"C105"},{"c":"6102205000","d":"Atenciones a Clientes","s":"C105"},{"c":"6103020000","d":"Gastos no Deducibles","s":"C105"},{"c":"6103020030","d":"Garantias-impuesto no deducible","s":"C105"},{"c":"6103100000","d":"Gastos de Activos no Depreciables","s":"C105"},{"c":"6103110010","d":"Ordenes de taller caja chica","s":"C105"}]
+};
+
+let lineCount = 0;
+let history = [];
+let solCounter = 1;
+try {
+  history = JSON.parse(localStorage.getItem('gq_traslados_hist') || '[]');
+  solCounter = parseInt(localStorage.getItem('gq_sol_counter') || '1');
+} catch(e) { /* localStorage bloqueado (SharePoint viewer) - usar valores por defecto */ }
+
+function safeSaveLS(key, val){
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
+
+function pad(n){return String(n).padStart(4,'0')}
+function nextSolNum(){return 'SOL-2026-'+pad(solCounter)}
+function today(){const d=new Date();return d.toLocaleDateString('es-CR')}
+
+function init(){
+  document.getElementById('fecha').value = today();
+  document.getElementById('solNum').value = nextSolNum();
+  document.getElementById('topSolNum').textContent = nextSolNum();
+  addLine();
+  addLine();
+  initMSAL().then(()=>cargarNombreUsuario());
+}
+
+// ── MSAL Configuration ──────────────────────────────────────────────
+const MSAL_CONFIG = {
+  auth: {
+    clientId: '341211a8-c45f-4dc7-a079-d82fc61754d4',
+    authority: 'https://login.microsoftonline.com/common',
+    redirectUri: window.location.href.split('?')[0]
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+const SHAREPOINT_SCOPE = ['https://grupoqcorporativo.sharepoint.com/AllSites.Write'];
+let msalInstance = null;
+let msalToken = null;
+
+async function initMSAL(){
+  msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+  await msalInstance.initialize();
+  // Manejar redirect si viene de login
+  try {
+    const resp = await msalInstance.handleRedirectPromise();
+    if(resp) msalToken = resp.accessToken;
+  } catch(e){}
+  // Verificar si ya hay cuenta activa
+  const accounts = msalInstance.getAllAccounts();
+  if(accounts.length > 0){
+    try {
+      const tokenResp = await msalInstance.acquireTokenSilent({
+        scopes: SHAREPOINT_SCOPE,
+        account: accounts[0]
+      });
+      msalToken = tokenResp.accessToken;
+      mostrarUsuarioLogueado(accounts[0].name || accounts[0].username);
+    } catch(e){ mostrarBtnLogin(); }
+  } else {
+    mostrarBtnLogin();
+  }
+}
+
+async function loginMSAL(){
+  try {
+    if(!msalInstance){
+      msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+      await msalInstance.initialize();
+    }
+    const resp = await msalInstance.loginPopup({ scopes: SHAREPOINT_SCOPE });
+    msalToken = resp.accessToken;
+    mostrarUsuarioLogueado(resp.account.name || resp.account.username);
+    document.getElementById('solicitante').value = resp.account.name || '';
+  } catch(e){
+    toast('Error al iniciar sesión: '+e.message, 'err');
+  }
+}
+
+function logoutMSAL(){
+  msalInstance.logoutPopup();
+  msalToken = null;
+  mostrarBtnLogin();
+  document.getElementById('solicitante').value = '';
+}
+
+function mostrarUsuarioLogueado(nombre){
+  document.getElementById('userDisplay').textContent = '👤 '+nombre;
+  document.getElementById('userDisplay').style.display = 'inline';
+  document.getElementById('btnLogin').style.display = 'none';
+  document.getElementById('btnLogout').style.display = 'inline';
+  document.getElementById('solicitante').value = nombre;
+}
+
+function mostrarBtnLogin(){
+  document.getElementById('userDisplay').style.display = 'none';
+  document.getElementById('btnLogin').style.display = 'inline';
+  document.getElementById('btnLogout').style.display = 'none';
+}
+
+async function obtenerToken(){
+  if(msalToken) return msalToken;
+  // Intentar adquirir silenciosamente
+  const accounts = msalInstance.getAllAccounts();
+  if(accounts.length > 0){
+    try {
+      const resp = await msalInstance.acquireTokenSilent({
+        scopes: SHAREPOINT_SCOPE,
+        account: accounts[0]
+      });
+      msalToken = resp.accessToken;
+      return msalToken;
+    } catch(e){}
+  }
+  // Si no hay token, pedir login
+  try {
+    const resp = await msalInstance.acquireTokenPopup({ scopes: SHAREPOINT_SCOPE });
+    msalToken = resp.accessToken;
+    mostrarUsuarioLogueado(resp.account.name || resp.account.username);
+    return msalToken;
+  } catch(e){
+    throw new Error('Debe iniciar sesión primero.');
+  }
+}
+
+async function cargarNombreUsuario(){
+  // El nombre se carga al hacer login con MSAL
+  // Si no hay sesión activa, el campo queda disponible para escribir
+  const accounts = msalInstance.getAllAccounts();
+  if(accounts.length === 0){
+    const sol = document.getElementById('solicitante');
+    sol.placeholder = 'Inicie sesión o ingrese su nombre';
+  }
+}
+
+function showTab(t){
+  document.getElementById('tab-nueva').style.display = t==='nueva'?'':'none';
+  document.getElementById('tab-historial').style.display = t==='historial'?'':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0&&t==='nueva')||(i===1&&t==='historial'));
+  });
+  if(t==='historial') renderHistory();
+}
+
+function getEmpresa(){return document.getElementById('empresa').value}
+
+function onEmpresaChange(){
+  document.querySelectorAll('.ceco-sel').forEach(s=>rebuildCecoOptions(s));
+  document.querySelectorAll('.cuenta-input').forEach(inp=>{
+    inp.value='';
+    const row=inp.closest('tr');
+    if(row) row.querySelector('.desc-cell').textContent='';
+  });
+  recalc();
+}
+
+function rebuildCecoOptions(sel){
+  const emp = getEmpresa();
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Seleccione CeCo —</option>';
+  DB.cecos.filter(c=>!emp||c.s===emp).forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c.c; o.textContent=c.c+' — '+c.d;
+    if(c.c===current) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function addLine(){
+  lineCount++;
+  const id = lineCount;
+  const emp = getEmpresa();
+  const cecoOpts = DB.cecos.filter(c=>!emp||c.s===emp).map(c=>`<option value="${c.c}">${c.c} — ${c.d}</option>`).join('');
+
+  const tr = document.createElement('tr');
+  tr.id = 'line-'+id;
+  tr.innerHTML = `
+    <td>
+      <select class="ceco-sel" onchange="recalc()">
+        <option value="">— Seleccione CeCo —</option>
+        ${cecoOpts}
+      </select>
+    </td>
+    <td>
+      <div class="ac-wrap">
+        <input type="text" class="cuenta-input" placeholder="Cuenta o descripción" oninput="onCuentaInput(this,${id})" onchange="onCuentaChange(this,${id})" onblur="closeDropDelay(${id})" autocomplete="off">
+        <div class="ac-drop" id="drop-${id}"></div>
+      </div>
+    </td>
+    <td><div class="desc-cell" id="desc-${id}" title="">—</div></td>
+    <td><input type="number" class="monto-input" placeholder="0.00" min="0" step="0.01" oninput="recalc()"></td>
+    <td>
+      <div class="mov-toggle">
+        <button type="button" class="mov-btn plus active" onclick="setMov(${id},'+')" id="btn-plus-${id}">+</button>
+        <button type="button" class="mov-btn minus" onclick="setMov(${id},'-')" id="btn-minus-${id}">−</button>
+      </div>
+    </td>
+    <td><input type="text" class="just-input" placeholder="Justificación del movimiento" oninput="recalc()"></td>
+    <td><button type="button" class="btn-remove" onclick="removeLine(${id})" title="Eliminar línea">✕</button></td>
+  `;
+  document.getElementById('linesBody').appendChild(tr);
+  recalc();
+}
+
+function removeLine(id){
+  const el = document.getElementById('line-'+id);
+  if(el) el.remove();
+  recalc();
+}
+
+function setMov(id, mov){
+  document.getElementById('btn-plus-'+id).classList.toggle('active', mov==='+');
+  document.getElementById('btn-minus-'+id).classList.toggle('active', mov==='-');
+  recalc();
+}
+
+function getMov(id){
+  return document.getElementById('btn-plus-'+id).classList.contains('active') ? '+' : '-';
+}
+
+function onCuentaInput(inp, id){
+  const emp = getEmpresa();
+  const q = inp.value.toLowerCase().trim();
+  const drop = document.getElementById('drop-'+id);
+  if(!q){drop.classList.remove('open');drop.innerHTML='';return;}
+  const matches = DB.cuentas.filter(c=>(!emp||c.s===emp)&&(c.c.includes(q)||c.d.toLowerCase().includes(q))).slice(0,12);
+  if(!matches.length){drop.classList.remove('open');return;}
+  drop.innerHTML = matches.map(c=>`<div class="ac-item" onmousedown="selectCuenta(${id},'${c.c}','${c.d.replace(/'/g,"\\'")}')"><span class="ac-code">${c.c}</span><span class="ac-desc">${c.d}</span></div>`).join('');
+  drop.classList.add('open');
+}
+
+function onCuentaChange(inp, id){
+  // Busca descripción cuando el usuario termina de escribir el código exacto
+  const emp = getEmpresa();
+  const q = inp.value.trim();
+  if(!q) return;
+  // Buscar coincidencia exacta por código
+  const match = DB.cuentas.find(c=>(!emp||c.s===emp) && c.c === q);
+  if(match){
+    selectCuenta(id, match.c, match.d);
+  }
+}
+
+function selectCuenta(id, code, desc){
+  const row = document.getElementById('line-'+id);
+  row.querySelector('.cuenta-input').value = code;
+  row.querySelector('.desc-cell').textContent = desc;
+  row.querySelector('.desc-cell').title = desc;
+  document.getElementById('drop-'+id).classList.remove('open');
+  recalc();
+}
+
+function closeDropDelay(id){
+  setTimeout(()=>{const d=document.getElementById('drop-'+id);if(d)d.classList.remove('open');},200);
+}
+
+function getLines(){
+  const rows = document.querySelectorAll('#linesBody tr');
+  return Array.from(rows).map(tr=>{
+    const id = tr.id.replace('line-','');
+    return {
+      ceco: tr.querySelector('.ceco-sel').value,
+      cuenta: tr.querySelector('.cuenta-input').value,
+      desc: tr.querySelector('.desc-cell').textContent,
+      monto: parseFloat(tr.querySelector('.monto-input').value)||0,
+      mov: getMov(id),
+      just: tr.querySelector('.just-input').value.trim()
+    };
+  });
+}
+
+function recalc(){
+  const lines = getLines();
+  let aum=0,dis=0;
+  lines.forEach(l=>{if(l.mov==='+') aum+=l.monto; else dis+=l.monto;});
+  const dif = Math.abs(aum-dis);
+  const bal = Math.abs(aum-dis)<0.01;
+
+  document.getElementById('totAum').textContent = '+ $'+aum.toFixed(2);
+  document.getElementById('totDis').textContent = '− $'+dis.toFixed(2);
+  document.getElementById('totDif').textContent = (bal?'':'⚠ ')+'$'+dif.toFixed(2);
+
+  const sb = document.getElementById('statusBadge');
+  const hasLines = lines.some(l=>l.monto>0);
+  if(!hasLines){
+    sb.className='status-badge'; sb.innerHTML='<span style="font-size:16px">◎</span> Ingrese líneas';
+  } else if(bal){
+    sb.className='status-badge status-ok'; sb.innerHTML='<span style="font-size:16px">✓</span> Solicitud balanceada';
+  } else {
+    sb.className='status-badge status-err'; sb.innerHTML='<span style="font-size:16px">⚠</span> Diferencia: $'+dif.toFixed(2);
+  }
+
+  const valid = bal && hasLines && document.getElementById('empresa').value && document.getElementById('solicitante').value.trim();
+  document.getElementById('btnRegistrar').disabled = !valid;
+
+  updateSAP(lines);
+}
+
+function updateSAP(lines){
+  const valid = lines.filter(l=>l.ceco&&l.cuenta&&l.monto>0);
+  if(!valid.length){document.getElementById('sapCard').style.display='none';return;}
+  document.getElementById('sapCard').style.display='';
+  const header = `<span class="sap-head">Pos.Doc  Mov.  Cuenta      CeCo            Prog.Fin  Importe    Texto</span>`;
+  const rows = valid.map((l,i)=>{
+    const pos = String(i+1).padEnd(7);
+    const mov = l.mov.padEnd(5);
+    const cta = l.cuenta.padEnd(12);
+    const ceco = l.ceco.toUpperCase().padEnd(16);
+    const prog = '000'.padEnd(10);
+    const monto = l.monto.toFixed(2).padEnd(11);
+    const txt = l.just.toUpperCase().substring(0,30);
+    const cls = l.mov==='+' ? 'sap-plus' : 'sap-minus';
+    return `<span class="${cls}">${pos}${mov}${cta}${ceco}${prog}${monto}${txt}</span>`;
+  });
+  document.getElementById('sapPre').innerHTML = header+'\n'+rows.join('\n');
+}
+
+function copySAP(){
+  const pre = document.getElementById('sapPre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(()=>toast('Copiado al portapapeles ✓')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copiado ✓');
+  });
+}
+
+function clearForm(){
+  if(!confirm('¿Limpiar el formulario actual?')) return;
+  document.getElementById('empresa').value='';
+  document.getElementById('solicitante').value='';
+  document.getElementById('linesBody').innerHTML='';
+  lineCount=0;
+  addLine(); addLine();
+  recalc();
+  cargarNombreUsuario();
+}
+
+function saveAsDraft(){
+  const data = buildRecord('Borrador');
+  if(!data.empresa){toast('Seleccione empresa primero','err');return;}
+  history.unshift(data);
+  save();
+  toast('Borrador guardado ✓');
+}
+
+async function registrar(){
+  const btn = document.getElementById('btnRegistrar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+
+  const data = buildRecord('Registrado');
+
+  try {
+    await enviarASharePoint(data);
+    history.unshift(data);
+    solCounter++;
+    safeSaveLS('gq_sol_counter', solCounter);
+    save();
+    toast('✓ Solicitud '+data.num+' registrada en SharePoint');
+    setTimeout(()=>{
+      clearForm();
+      document.getElementById('solNum').value = nextSolNum();
+      document.getElementById('topSolNum').textContent = nextSolNum();
+      btn.textContent = '✓ Registrar solicitud';
+    },800);
+  } catch(e) {
+    toast('Error: '+e.message,'err');
+    btn.disabled = false;
+    btn.textContent = '✓ Registrar solicitud';
+  }
+}
+
+async function enviarASharePoint(data){
+  const SITE_URL = 'https://usamac.sharepoint.com/sites/DiegoCascante';
+  const LIST_NAME = 'Traslados_Prueba';
+
+  // Obtener token MSAL
+  const token = await obtenerToken();
+
+  // Con token Bearer no se necesita FormDigest
+  const digestResp = await fetch(`${SITE_URL}/_api/contextinfo`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json;odata=verbose',
+      'Content-Type': 'application/json;odata=verbose',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if(!digestResp.ok) throw new Error('No se pudo autenticar con SharePoint ('+digestResp.status+').');
+  const digestData = await digestResp.json();
+  const digest = digestData.d.GetContextWebInformation.FormDigestValue;
+
+  const lineasValidas = data.lines.filter(l=>l.ceco&&l.cuenta&&l.monto>0);
+  const totalAum = lineasValidas.filter(l=>l.mov==='+').reduce((a,l)=>a+l.monto,0);
+  const totalDis = lineasValidas.filter(l=>l.mov==='-').reduce((a,l)=>a+l.monto,0);
+  const lineasTexto = lineasValidas.map((l,i)=>
+    `${i+1}. [${l.mov==='+'?'AUMENTO':'DISMINUCIÓN'}] CeCo: ${l.ceco} | Cuenta: ${l.cuenta} | ${l.desc} | $${l.monto.toFixed(2)} | ${l.just}`
+  ).join('\n');
+
+  const body = {
+    '__metadata': {'type': 'SP.Data.Traslados_x005f_PruebaListItem'},
+    'Title': data.num,
+    'Solicitante': data.solicitante,
+    'Empresa': data.empresa,
+    'Fecha': new Date().toISOString(),
+    'TotalAumentos': totalAum,
+    'TotalDisminuciones': totalDis,
+    'CantidadLineas': lineasValidas.length,
+    'Lineas': lineasTexto,
+    'Estado': 'Pendiente'
+  };
+
+  const resp = await fetch(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_NAME}')/items`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json;odata=verbose',
+      'Content-Type': 'application/json;odata=verbose',
+      'X-RequestDigest': digest,
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(body)
+  });
+
+  // 200 y 201 son ambos éxito en SharePoint REST API
+  if(resp.status !== 200 && resp.status !== 201){
+    const errData = await resp.json().catch(()=>null);
+    throw new Error('Error '+resp.status+': '+(errData?.error?.message?.value||resp.statusText));
+  }
+}
+
+function buildRecord(estado){
+  return {
+    num: document.getElementById('solNum').value,
+    fecha: today(),
+    solicitante: document.getElementById('solicitante').value||'—',
+    empresa: document.getElementById('empresa').value||'—',
+    estado,
+    lines: getLines(),
+    monto: getLines().filter(l=>l.mov==='+').reduce((a,l)=>a+l.monto,0)
+  };
+}
+
+function save(){
+  safeSaveLS('gq_traslados_hist', JSON.stringify(history));
+}
+
+function renderHistory(){
+  const el = document.getElementById('histContent');
+  if(!history.length){
+    el.innerHTML='<div class="hist-empty">Sin solicitudes registradas aún.</div>';
+    return;
+  }
+  const rows = history.map(h=>`
+    <tr>
+      <td><span class="sol-link">${h.num}</span></td>
+      <td>${h.fecha}</td>
+      <td>${h.solicitante}</td>
+      <td>$${h.monto.toFixed(2)}</td>
+      <td><span class="badge-${h.empresa.toLowerCase()}">${h.empresa}</span></td>
+      <td><span class="chip ${h.estado==='Registrado'?'chip-ok':'chip-draft'}">${h.estado}</span></td>
+    </tr>`).join('');
+  el.innerHTML=`<table class="hist-table"><thead><tr><th>N.º solicitud</th><th>Fecha</th><th>Solicitante</th><th>Monto</th><th>Empresa</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function toast(msg, type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background = type==='err'?'#b91c1c':'#1B3A6B';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>
