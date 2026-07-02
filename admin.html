@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Control — Traslados GQ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f5f7;color:#1a1a2e;font-size:14px}
+.topbar{background:#1B3A6B;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.logo-pill{background:#C0272D;color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px}
+.topbar h1{font-size:15px;font-weight:500;flex:1}
+.wrap{max-width:1400px;margin:24px auto;padding:0 16px}
+.tabs{display:flex;gap:0;border-bottom:2px solid #dde3ef;margin-bottom:20px}
+.tab-btn{padding:10px 20px;font-size:13px;font-weight:500;background:none;border:none;cursor:pointer;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-btn.active{color:#1B3A6B;border-bottom-color:#1B3A6B}
+.tab-btn:hover:not(.active){color:#1B3A6B;background:#f0f4ff}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;color:#1B3A6B;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px}
+.stat-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-val{font-size:28px;font-weight:700;color:#1B3A6B}
+.stat-sub{font-size:12px;color:#6b7280;margin-top:4px}
+/* Table */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+.data-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:middle}
+.data-table tr:hover td{background:#f8fafc}
+/* Chips */
+.chip{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.chip-pendiente{background:#fef9c3;color:#a16207}
+.chip-contabilizado{background:#dcfce7;color:#15803d}
+.chip-rechazado{background:#fee2e2;color:#b91c1c}
+.chip-traslado{background:#dbeafe;color:#1e40af}
+.chip-adelanto{background:#e0e7ff;color:#4338ca}
+.chip-sobregiro{background:#fee2e2;color:#b91c1c}
+.badge-c101{background:#dbeafe;color:#1e40af;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-c105{background:#d1fae5;color:#065f46;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+/* Buttons */
+.btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-primary{background:#1B3A6B;color:#fff}
+.btn-primary:hover{background:#15306b}
+.btn-success{background:#15803d;color:#fff}
+.btn-success:hover{background:#166534}
+.btn-danger{background:#b91c1c;color:#fff}
+.btn-danger:hover{background:#991b1b}
+.btn-ghost{background:#fff;border:1px solid #d1d5db;color:#374151}
+.btn-ghost:hover{background:#f9fafb}
+.btn-sm{padding:4px 10px;font-size:11px}
+/* Filters */
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#1a1a2e;background:#fff}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-title{font-size:16px;font-weight:600;color:#1B3A6B;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280}
+.detail-row{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.detail-label{font-weight:600;color:#6b7280}
+.lineas-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+.lineas-table th{background:#1B3A6B;color:#fff;padding:7px 10px;text-align:left}
+.lineas-table td{padding:7px 10px;border-bottom:1px solid #f1f5f9}
+.lineas-table tr:nth-child(even) td{background:#f8fafc}
+/* Catálogos */
+.cat-table{width:100%;border-collapse:collapse;font-size:12px}
+.cat-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;padding:6px 10px;text-align:left;border-bottom:2px solid #e2e8f0}
+.cat-table td{padding:7px 10px;border-bottom:1px solid #f1f5f9}
+.cat-table tr:hover td{background:#f8fafc}
+.cat-input{width:100%;border:1px solid #e2e8f0;border-radius:4px;padding:4px 7px;font-size:12px}
+.cat-input:focus{outline:none;border-color:#1B3A6B}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1B3A6B;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1}
+.empty-state{text-align:center;padding:48px;color:#9ca3af}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.login-overlay{position:fixed;inset:0;background:#1B3A6B;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:#fff;border-radius:12px;padding:40px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.login-box img{height:60px;margin-bottom:16px}
+.login-box h2{font-size:18px;color:#1B3A6B;margin:0 0 6px}
+.login-box p{font-size:13px;color:#6b7280;margin:0 0 24px}
+.login-field{display:flex;flex-direction:column;gap:5px;text-align:left;margin-bottom:14px}
+.login-field label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.4px}
+.login-field input{padding:9px 12px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;outline:none}
+.login-field input:focus{border-color:#1B3A6B;box-shadow:0 0 0 3px rgba(27,58,107,.1)}
+.login-btn{width:100%;padding:10px;background:#1B3A6B;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+.login-btn:hover{background:#15306b}
+.login-error{color:#b91c1c;font-size:12px;margin-top:8px;display:none}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <img src="https://raw.githubusercontent.com/dcascante-gq/traslados-gq/main/logo.png" alt="Grupo Q" onerror="this.style.display='none'">
+    <h2>Panel de Control</h2>
+    <p>Traslados de Presupuesto 2026 — Grupo Q</p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="Usuario" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <p class="login-error" id="loginError">Usuario o contraseña incorrectos</p>
+  </div>
+</div>
+
+<div class="topbar">
+  <span class="logo-pill">GQ</span>
+  <h1>Panel de Control — Traslados de Presupuesto 2026</h1>
+  <button class="btn btn-ghost btn-sm" onclick="cargarDatos()" style="color:#fff;border-color:rgba(255,255,255,.3)">↻ Actualizar</button>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('pendientes')">📋 Pendientes</button>
+    <button class="tab-btn" onclick="showTab('historial')">📁 Historial</button>
+    <button class="tab-btn" onclick="showTab('catalogos')">⚙️ Catálogos</button>
+  </div>
+
+  <!-- PENDIENTES -->
+  <div id="tab-pendientes">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-val" id="statPendientes">—</div><div class="stat-sub">Por procesar</div></div>
+      <div class="stat-card"><div class="stat-label">Contabilizados</div><div class="stat-val" id="statContabilizados" style="color:#15803d">—</div><div class="stat-sub">Este mes</div></div>
+      <div class="stat-card"><div class="stat-label">Rechazados</div><div class="stat-val" id="statRechazados" style="color:#b91c1c">—</div><div class="stat-sub">Este mes</div></div>
+      <div class="stat-card"><div class="stat-label">Total movimientos</div><div class="stat-val" id="statTotal">—</div><div class="stat-sub">2026</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Solicitudes pendientes</span>
+        <span id="countPendientes" style="font-size:12px;color:#6b7280;font-weight:400"></span>
+      </div>
+      <div class="filters">
+        <select id="filtroTipo" onchange="renderPendientes()">
+          <option value="">Todos los tipos</option>
+          <option value="Traslado">Traslado</option>
+          <option value="Adelanto">Adelanto</option>
+          <option value="Sobregiro">Sobregiro</option>
+        </select>
+        <select id="filtroEmpresa" onchange="renderPendientes()">
+          <option value="">Todas las empresas</option>
+          <option value="C101">C101</option>
+          <option value="C105">C105</option>
+        </select>
+        <input type="text" id="filtroBuscar" placeholder="Buscar por solicitud o solicitante..." oninput="renderPendientes()" style="min-width:250px">
+      </div>
+      <div id="tablaPendientes"></div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="tab-historial" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Historial completo de solicitudes</span>
+        <span id="countHistorial" style="font-size:12px;color:#6b7280;font-weight:400"></span>
+      </div>
+      <div class="filters">
+        <select id="histFiltroEstado" onchange="renderHistorial()">
+          <option value="">Todos los estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Contabilizado">Contabilizado</option>
+          <option value="Rechazado">Rechazado</option>
+        </select>
+        <select id="histFiltroTipo" onchange="renderHistorial()">
+          <option value="">Todos los tipos</option>
+          <option value="Traslado">Traslado</option>
+          <option value="Adelanto">Adelanto</option>
+          <option value="Sobregiro">Sobregiro</option>
+        </select>
+        <input type="text" id="histBuscar" placeholder="Buscar..." oninput="renderHistorial()" style="min-width:250px">
+      </div>
+      <div id="tablaHistorial"></div>
+    </div>
+  </div>
+
+  <!-- CATÁLOGOS -->
+  <div id="tab-catalogos" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Usuarios</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="descargarPlantillaUsuarios()">↓ Plantilla Excel</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('excelUsuarios').click()" style="border-color:#15803d;color:#15803d">↑ Cargar desde Excel</button>
+          <input type="file" id="excelUsuarios" accept=".xlsx,.xls" style="display:none" onchange="cargarUsuariosDesdeExcel(this)">
+          <button class="btn btn-primary btn-sm" onclick="agregarUsuario()">+ Agregar uno</button>
+        </div>
+      </div>
+      <div id="tablaUsuarios"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>Centros de Costo</span>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="buscarCeco" placeholder="Buscar CeCo..." oninput="renderCecos()" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
+          <button class="btn btn-primary btn-sm" onclick="agregarCeco()">+ Agregar</button>
+        </div>
+      </div>
+      <div id="tablaCecos" style="max-height:400px;overflow-y:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>Cuentas Contables</span>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="buscarCuenta" placeholder="Buscar cuenta..." oninput="renderCuentas()" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
+          <button class="btn btn-primary btn-sm" onclick="agregarCuenta()">+ Agregar</button>
+        </div>
+      </div>
+      <div id="tablaCuentas" style="max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitulo">Detalle de solicitud</span>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div id="modalContenido"></div>
+    <div id="modalAcciones" style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let GITHUB_TOKEN = '';
+const REPO = 'dcascante-gq/traslados-gq';
+const BRANCH = 'main';
+const GMAIL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyqeI-Fjqh45RRsUDjOw7mLhmoh7yamEhh_5wbrxQ-h276ulgtU9P2Rl34zhWPN5Sgc/exec';
+
+let catalogos = {cecos:[], cuentas:[], usuarios:[], configuracion:{}};
+let traslados = [];
+let trasladoSHA = '';
+let catalogoSHA = '';
+
+// ── GitHub API ────────────────────────────────────────────────────────
+async function githubGet(path){
+  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+    headers: {'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json'}
+  });
+  if(r.status === 401){
+    sessionStorage.removeItem('gh_token');
+    GITHUB_TOKEN = '';
+    throw new Error('Token inválido o expirado. Recargá la página para ingresar uno nuevo.');
+  }
+  if(!r.ok) throw new Error('Error leyendo '+path+' ('+r.status+')');
+  return r.json();
+}
+
+async function githubPut(path, content, sha, mensaje){
+  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: {'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      message: mensaje,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+      sha: sha,
+      branch: BRANCH
+    })
+  });
+  if(!r.ok){
+    const err = await r.json();
+    throw new Error(err.message || 'Error guardando en GitHub');
+  }
+  return r.json();
+}
+
+// ── Cargar datos ──────────────────────────────────────────────────────
+// ── Credenciales de acceso ───────────────────────────────────────────
+const CREDENCIALES = {
+  usuario: 'dcascante',
+  password: 'D1360Cascante*',
+  t1: 'PARTE1',
+  t2: 'PARTE2',
+  t3: 'PARTE3',
+  t4: 'PARTE4'
+};
+
+function doLogin(){
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+
+  if(user === CREDENCIALES.usuario && pass === CREDENCIALES.password){
+    document.getElementById('loginOverlay').style.display = 'none';
+    GITHUB_TOKEN = sessionStorage.getItem('gh_token') || '';
+    if(!GITHUB_TOKEN){
+      solicitarToken();
+    } else {
+      // Login requerido antes de cargar datos
+    }
+  } else {
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    setTimeout(()=>err.style.display='none', 3000);
+  }
+}
+
+function solicitarToken(){
+  // Token configurado internamente
+  cargarDatos();
+}
+
+async function cargarDatos(){
+  if(!GITHUB_TOKEN){
+    solicitarToken();
+    return;
+  }
+  try {
+    const [catFile, trasFile] = await Promise.all([
+      githubGet('catalogos.json'),
+      githubGet('traslados.json')
+    ]);
+
+    catalogoSHA = catFile.sha;
+    catalogos = JSON.parse(atob(catFile.content.replace(/\n/g,'')));
+
+    trasladoSHA = trasFile.sha;
+    const trasData = JSON.parse(atob(trasFile.content.replace(/\n/g,'')));
+    traslados = trasData.traslados || [];
+
+    actualizarStats();
+    renderPendientes();
+    renderHistorial();
+    renderUsuarios();
+    renderCecos();
+    renderCuentas();
+  } catch(e){
+    toast('Error cargando datos: '+e.message, 'err');
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────
+function actualizarStats(){
+  const pendientes = traslados.filter(t=>t.estado==='Pendiente').length;
+  const contabilizados = traslados.filter(t=>t.estado==='Contabilizado').length;
+  const rechazados = traslados.filter(t=>t.estado==='Rechazado').length;
+  document.getElementById('statPendientes').textContent = pendientes;
+  document.getElementById('statContabilizados').textContent = contabilizados;
+  document.getElementById('statRechazados').textContent = rechazados;
+  document.getElementById('statTotal').textContent = traslados.length;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+function showTab(t){
+  ['pendientes','historial','catalogos'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display = id===t ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['pendientes','historial','catalogos'][i]===t);
+  });
+}
+
+// ── Chip helpers ──────────────────────────────────────────────────────
+function chipEstado(e){
+  const cls = e==='Pendiente'?'chip-pendiente':e==='Contabilizado'?'chip-contabilizado':'chip-rechazado';
+  return `<span class="chip ${cls}">${e}</span>`;
+}
+function chipTipo(t){
+  const cls = t==='Traslado'?'chip-traslado':t==='Adelanto'?'chip-adelanto':'chip-sobregiro';
+  return `<span class="chip ${cls}">${t}</span>`;
+}
+function badgeEmp(e){
+  return `<span class="badge-${e.toLowerCase()}">${e}</span>`;
+}
+
+// ── Pendientes ────────────────────────────────────────────────────────
+function renderPendientes(){
+  const tipo = document.getElementById('filtroTipo').value;
+  const empresa = document.getElementById('filtroEmpresa').value;
+  const buscar = document.getElementById('filtroBuscar').value.toLowerCase();
+
+  let data = traslados.filter(t=>t.estado==='Pendiente');
+  if(tipo) data = data.filter(t=>t.tipo===tipo);
+  if(empresa) data = data.filter(t=>t.empresa===empresa);
+  if(buscar) data = data.filter(t=>
+    t.num_solicitud.toLowerCase().includes(buscar) ||
+    t.solicitante.toLowerCase().includes(buscar)
+  );
+
+  document.getElementById('countPendientes').textContent = data.length + ' solicitudes';
+
+  if(!data.length){
+    document.getElementById('tablaPendientes').innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>No hay solicitudes pendientes</p></div>';
+    return;
+  }
+
+  const rows = data.map(t=>`
+    <tr>
+      <td style="font-family:monospace;font-weight:600;color:#1B3A6B">${t.num_solicitud}</td>
+      <td>${t.fecha}</td>
+      <td>${t.solicitante}</td>
+      <td>${badgeEmp(t.empresa)}</td>
+      <td>${chipTipo(t.tipo||'Traslado')}</td>
+      <td style="color:#15803d;font-weight:600">$${parseFloat(t.total_aumentos||0).toFixed(2)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="verDetalle('${t.num_solicitud}')">Ver</button>
+        <button class="btn btn-success btn-sm" onclick="cambiarEstado('${t.num_solicitud}','Contabilizado')">✓ Contabilizar</button>
+        <button class="btn btn-danger btn-sm" onclick="cambiarEstado('${t.num_solicitud}','Rechazado')">✕ Rechazar</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('tablaPendientes').innerHTML = `
+    <table class="data-table">
+      <thead><tr>
+        <th>N.º Solicitud</th><th>Fecha</th><th>Solicitante</th><th>Empresa</th><th>Tipo</th><th>Monto</th><th>Acciones</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── Historial ─────────────────────────────────────────────────────────
+function renderHistorial(){
+  const estado = document.getElementById('histFiltroEstado').value;
+  const tipo = document.getElementById('histFiltroTipo').value;
+  const buscar = document.getElementById('histBuscar').value.toLowerCase();
+
+  let data = [...traslados].reverse();
+  if(estado) data = data.filter(t=>t.estado===estado);
+  if(tipo) data = data.filter(t=>t.tipo===tipo);
+  if(buscar) data = data.filter(t=>
+    t.num_solicitud.toLowerCase().includes(buscar) ||
+    t.solicitante.toLowerCase().includes(buscar)
+  );
+
+  document.getElementById('countHistorial').textContent = data.length + ' registros';
+
+  if(!data.length){
+    document.getElementById('tablaHistorial').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Sin registros</p></div>';
+    return;
+  }
+
+  const rows = data.map(t=>`
+    <tr>
+      <td style="font-family:monospace;font-weight:600;color:#1B3A6B">${t.num_solicitud}</td>
+      <td>${t.fecha}</td>
+      <td>${t.solicitante}</td>
+      <td>${badgeEmp(t.empresa)}</td>
+      <td>${chipTipo(t.tipo||'Traslado')}</td>
+      <td style="color:#15803d;font-weight:600">$${parseFloat(t.total_aumentos||0).toFixed(2)}</td>
+      <td>${chipEstado(t.estado)}</td>
+      <td>${t.fecha_proceso||'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="verDetalle('${t.num_solicitud}')">Ver</button></td>
+    </tr>`).join('');
+
+  document.getElementById('tablaHistorial').innerHTML = `
+    <table class="data-table">
+      <thead><tr>
+        <th>N.º Solicitud</th><th>Fecha</th><th>Solicitante</th><th>Empresa</th><th>Tipo</th><th>Monto</th><th>Estado</th><th>Procesado</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── Ver detalle ───────────────────────────────────────────────────────
+function verDetalle(num){
+  const t = traslados.find(x=>x.num_solicitud===num);
+  if(!t) return;
+
+  const lineas = t.lineas ? t.lineas.split('|LINEA|') : [];
+  const filasLineas = lineas.map(l=>{
+    const cols = l.split('|COL|');
+    return '<tr>'+cols.map(c=>`<td>${(c||'').trim()}</td>`).join('')+'</tr>';
+  }).join('');
+
+  document.getElementById('modalTitulo').textContent = 'Solicitud '+t.num_solicitud;
+  document.getElementById('modalContenido').innerHTML = `
+    <div class="detail-row"><span class="detail-label">N.º Solicitud</span><span style="font-family:monospace;font-weight:600;color:#1B3A6B">${t.num_solicitud}</span></div>
+    <div class="detail-row"><span class="detail-label">Tipo</span>${chipTipo(t.tipo||'Traslado')}</div>
+    <div class="detail-row"><span class="detail-label">Estado</span>${chipEstado(t.estado)}</div>
+    <div class="detail-row"><span class="detail-label">Fecha</span><span>${t.fecha}</span></div>
+    <div class="detail-row"><span class="detail-label">Solicitante</span><span>${t.solicitante}</span></div>
+    <div class="detail-row"><span class="detail-label">Correo</span><span>${t.correo_solicitante||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Empresa</span>${badgeEmp(t.empresa)}</div>
+    <div class="detail-row"><span class="detail-label">Total Aumentos</span><span style="color:#15803d;font-weight:600">$${parseFloat(t.total_aumentos||0).toFixed(2)}</span></div>
+    <div class="detail-row"><span class="detail-label">Total Disminuciones</span><span style="color:#b91c1c;font-weight:600">$${parseFloat(t.total_disminuciones||0).toFixed(2)}</span></div>
+    ${t.observacion ? `<div class="detail-row"><span class="detail-label">Observación</span><span>${t.observacion}</span></div>` : ''}
+    <h4 style="margin:16px 0 8px;color:#1B3A6B;font-size:12px;text-transform:uppercase;letter-spacing:.5px">Líneas de traslado</h4>
+    <table class="lineas-table">
+      <thead><tr><th>#</th><th>Mov.</th><th>CeCo</th><th>Desc. CeCo</th><th>Cuenta</th><th>Desc. Cuenta</th><th>Monto</th><th>Justificación</th></tr></thead>
+      <tbody>${filasLineas}</tbody>
+    </table>`;
+
+  const acciones = document.getElementById('modalAcciones');
+  if(t.estado === 'Pendiente'){
+    acciones.innerHTML = `
+      <div style="width:100%">
+        <div id="seccionContabilizar" style="display:none;margin-bottom:12px;padding:14px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0">
+          <p style="font-size:12px;font-weight:600;color:#15803d;margin:0 0 8px">📎 Adjuntar comprobante de SAP <span style="color:#b91c1c">*</span></p>
+          <input type="file" id="adjuntoSAP" accept=".png,.jpg,.jpeg,.pdf" style="font-size:12px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%">
+          <input type="text" id="obsContabilizar" placeholder="Observación (opcional)" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-top:8px">
+          <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+            <button class="btn btn-ghost btn-sm" onclick="cancelarAccion()">Cancelar</button>
+            <button class="btn btn-success" onclick="confirmarContabilizar('${t.num_solicitud}')">✓ Confirmar contabilización</button>
+          </div>
+        </div>
+        <div id="seccionRechazar" style="display:none;margin-bottom:12px;padding:14px;background:#fff5f5;border-radius:8px;border:1px solid #fecaca">
+          <p style="font-size:12px;font-weight:600;color:#b91c1c;margin:0 0 8px">Motivo de rechazo <span style="color:#b91c1c">*</span></p>
+          <select id="motivoRechazo" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-bottom:8px">
+            <option value="">— Seleccione motivo —</option>
+            <option value="Presupuesto insuficiente">Presupuesto insuficiente</option>
+            <option value="CeCo incorrecto">CeCo incorrecto</option>
+            <option value="Cuenta contable incorrecta">Cuenta contable incorrecta</option>
+            <option value="Falta autorización">Falta autorización</option>
+            <option value="Otro">Otro (especificar abajo)</option>
+          </select>
+          <input type="text" id="obsRechazo" placeholder="Observación adicional (requerida si seleccionó Otro)" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+          <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+            <button class="btn btn-ghost btn-sm" onclick="cancelarAccion()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarRechazo('${t.num_solicitud}')">✕ Confirmar rechazo</button>
+          </div>
+        </div>
+        <div id="botonesAccion" style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="cerrarModal()">Cerrar</button>
+          <button class="btn btn-success" onclick="mostrarSeccion('contabilizar')">✓ Contabilizar</button>
+          <button class="btn btn-danger" onclick="mostrarSeccion('rechazar')">✕ Rechazar</button>
+        </div>
+      </div>`;
+  } else {
+    acciones.innerHTML = `<button class="btn btn-ghost" onclick="cerrarModal()">Cerrar</button>`;
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function cerrarModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ── Cambiar estado ────────────────────────────────────────────────────
+function mostrarSeccion(seccion){
+  document.getElementById('seccionContabilizar').style.display = seccion==='contabilizar' ? '' : 'none';
+  document.getElementById('seccionRechazar').style.display = seccion==='rechazar' ? '' : 'none';
+  document.getElementById('botonesAccion').style.display = 'none';
+}
+
+function cancelarAccion(){
+  document.getElementById('seccionContabilizar').style.display = 'none';
+  document.getElementById('seccionRechazar').style.display = 'none';
+  document.getElementById('botonesAccion').style.display = 'flex';
+}
+
+async function confirmarContabilizar(num){
+  const adjunto = document.getElementById('adjuntoSAP').files[0];
+  if(!adjunto){
+    alert('Debe adjuntar el comprobante de SAP para contabilizar.');
+    return;
+  }
+  const obs = document.getElementById('obsContabilizar').value;
+
+  // Convertir imagen a base64
+  const adjBase64 = await new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(adjunto);
+  });
+
+  await cambiarEstado(num, 'Contabilizado', obs, adjBase64, adjunto.name, adjunto.type);
+}
+
+async function confirmarRechazo(num){
+  const motivo = document.getElementById('motivoRechazo').value;
+  const obs = document.getElementById('obsRechazo').value;
+
+  if(!motivo){
+    alert('Debe seleccionar un motivo de rechazo.');
+    return;
+  }
+  if(motivo === 'Otro' && !obs.trim()){
+    alert('Debe especificar el motivo en la observación.');
+    return;
+  }
+
+  const motivoFinal = motivo === 'Otro' ? obs : motivo + (obs ? ': ' + obs : '');
+  await cambiarEstado(num, 'Rechazado', motivoFinal, null, null, null);
+}
+
+async function cambiarEstado(num, nuevoEstado, obs='', adjBase64='', adjNombre='', adjMime=''){
+  // obs viene como parámetro
+  const idx = traslados.findIndex(t=>t.num_solicitud===num);
+  if(idx === -1) return;
+
+  const t = traslados[idx];
+  t.estado = nuevoEstado;
+  t.fecha_proceso = new Date().toLocaleDateString('es-CR');
+  if(obs) t.observacion = obs;
+
+  try {
+    const result = await githubPut('traslados.json', {traslados}, trasladoSHA, `${nuevoEstado}: ${num}`);
+    trasladoSHA = result.content.sha;
+
+    // Notificar al solicitante si tiene correo
+    if(t.correo_solicitante){
+      await notificarSolicitante(t, nuevoEstado, obs, adjBase64, adjNombre, adjMime);
+    }
+
+    toast(`✓ Solicitud ${num} marcada como ${nuevoEstado}`);
+    cerrarModal();
+    actualizarStats();
+    renderPendientes();
+    renderHistorial();
+  } catch(e){
+    toast('Error: '+e.message, 'err');
+  }
+}
+
+// ── Notificar solicitante ─────────────────────────────────────────────
+async function notificarSolicitante(t, estado, obs, adjBase64='', adjNombre='', adjMime=''){
+  const color = estado === 'Contabilizado' ? '#15803d' : '#b91c1c';
+  const icono = estado === 'Contabilizado' ? '✅' : '❌';
+
+  await fetch(GMAIL_SCRIPT, {
+    method: 'POST',
+    body: JSON.stringify({
+      tipo_notificacion: 'respuesta',
+      correo_destino: t.correo_solicitante,
+      num_solicitud: t.num_solicitud,
+      solicitante: t.solicitante,
+      empresa: t.empresa,
+      tipo_movimiento: t.tipo || 'Traslado',
+      estado: estado,
+      observacion: obs || '',
+      fecha_proceso: t.fecha_proceso,
+      color: color,
+      icono: icono,
+      adjunto_base64: adjBase64 || '',
+      adjunto_nombre: adjNombre || '',
+      adjunto_mime: adjMime || ''
+    })
+  });
+}
+
+// ── Catálogos — Usuarios ──────────────────────────────────────────────
+function descargarPlantillaUsuarios(){
+  const wb = XLSX.utils.book_new();
+  const datos = [
+    ['ID Usuario', 'Nombre', 'Correo', 'Departamento', 'Sociedad'],
+    ['dcascante', 'Diego Armando Cascante Alvarado', 'dcascante@grupoq.com', 'Cuentas por Pagar', 'C101'],
+    ['jperez', 'Juan Pérez González', 'jperez@grupoq.com', 'Administración', 'C101'],
+    ['mrodriguez', 'María Rodríguez López', 'mrodriguez@grupoq.com', 'Finanzas', 'C105']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(datos);
+  ws['!cols'] = [{wch:14},{wch:30},{wch:28},{wch:22},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
+  XLSX.writeFile(wb, 'Plantilla_Usuarios_GQ.xlsx');
+  toast('✓ Plantilla descargada');
+}
+
+async function cargarUsuariosDesdeExcel(input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      if(rows.length < 2){
+        toast('El archivo no tiene datos', 'err');
+        return;
+      }
+
+      const headers = rows[0].map(h=>String(h).toLowerCase().trim());
+      const idxId = headers.findIndex(h=>h.includes('id'));
+      const idxNombre = headers.findIndex(h=>h.includes('nombre'));
+      const idxCorreo = headers.findIndex(h=>h.includes('correo'));
+      const idxDepto = headers.findIndex(h=>h.includes('depto') || h.includes('departamento'));
+      const idxSoc = headers.findIndex(h=>h.includes('sociedad'));
+
+      if(idxId===-1 || idxNombre===-1 || idxCorreo===-1){
+        toast('Faltan columnas requeridas: ID Usuario, Nombre, Correo', 'err');
+        return;
+      }
+
+      const nuevos = [];
+      const errores = [];
+
+      rows.slice(1).forEach((row, i)=>{
+        const id = String(row[idxId]||'').trim().toLowerCase();
+        const nombre = String(row[idxNombre]||'').trim();
+        const correo = String(row[idxCorreo]||'').trim();
+        const depto = idxDepto>=0 ? String(row[idxDepto]||'').trim() : '';
+        const soc = idxSoc>=0 ? String(row[idxSoc]||'').trim() : 'C101';
+
+        if(!id && !nombre && !correo) return; // fila vacía
+
+        if(!id){ errores.push(`Fila ${i+2}: falta ID`); return; }
+        if(!nombre){ errores.push(`Fila ${i+2}: falta Nombre`); return; }
+        if(!correo){ errores.push(`Fila ${i+2}: falta Correo`); return; }
+        if(!correo.includes('@')){ errores.push(`Fila ${i+2}: correo inválido`); return; }
+
+        nuevos.push({id, nombre, correo, departamento: depto, sociedad: soc});
+      });
+
+      if(!nuevos.length){
+        toast('No se encontraron usuarios válidos', 'err');
+        return;
+      }
+
+      // Preguntar si reemplazar o agregar
+      const reemplazar = confirm(
+        `Se encontraron ${nuevos.length} usuarios en el Excel.\n\n` +
+        `¿Querés REEMPLAZAR todos los usuarios existentes (OK) o AGREGAR a los existentes (Cancelar)?`
+      );
+
+      if(reemplazar){
+        catalogos.usuarios = nuevos;
+      } else {
+        // Agregar evitando duplicados por ID
+        nuevos.forEach(u=>{
+          const existe = catalogos.usuarios.findIndex(x=>x.id===u.id);
+          if(existe>=0){
+            catalogos.usuarios[existe] = u; // actualizar existente
+          } else {
+            catalogos.usuarios.push(u);
+          }
+        });
+      }
+
+      await guardarCatalogos('Carga masiva usuarios: '+nuevos.length+' registros');
+      renderUsuarios();
+
+      if(errores.length){
+        toast(`✓ ${nuevos.length} usuarios cargados. ⚠ ${errores.length} errores ignorados`, 'err');
+      } else {
+        toast(`✓ ${nuevos.length} usuarios cargados correctamente`);
+      }
+
+    } catch(err){
+      toast('Error leyendo el archivo: '+err.message, 'err');
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderUsuarios(){
+  const usuarios = catalogos.usuarios || [];
+  if(!usuarios.length){
+    document.getElementById('tablaUsuarios').innerHTML = '<p style="color:#9ca3af;font-size:13px">Sin usuarios registrados.</p>';
+    return;
+  }
+  const rows = usuarios.map((u,i)=>`
+    <tr>
+      <td style="font-family:monospace;font-weight:600;color:#1B3A6B">${u.id||'—'}</td>
+      <td>${u.nombre}</td>
+      <td>${u.correo}</td>
+      <td>${u.departamento||'—'}</td>
+      <td><span class="badge-${(u.sociedad||'c101').toLowerCase()}">${u.sociedad||'—'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${i})">Eliminar</button></td>
+    </tr>`).join('');
+  document.getElementById('tablaUsuarios').innerHTML = `
+    <table class="cat-table">
+      <thead><tr><th>ID Usuario</th><th>Nombre</th><th>Correo</th><th>Departamento</th><th>Sociedad</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function agregarUsuario(){
+  const id = prompt('ID de usuario de red (ej. dcascante):');
+  if(!id) return;
+  const nombre = prompt('Nombre completo:');
+  if(!nombre) return;
+  const correo = prompt('Correo electrónico:');
+  if(!correo) return;
+  const depto = prompt('Departamento:') || '';
+  const soc = prompt('Sociedad (C101/C105):') || 'C101';
+
+  catalogos.usuarios = catalogos.usuarios || [];
+  catalogos.usuarios.push({id: id.trim().toLowerCase(), nombre, correo, departamento: depto, sociedad: soc});
+
+  await guardarCatalogos('Agregar usuario: '+nombre);
+  renderUsuarios();
+}
+
+async function eliminarUsuario(idx){
+  if(!confirm('¿Eliminar este usuario?')) return;
+  catalogos.usuarios.splice(idx, 1);
+  await guardarCatalogos('Eliminar usuario');
+  renderUsuarios();
+}
+
+// ── Catálogos — CeCos ─────────────────────────────────────────────────
+function renderCecos(){
+  const q = (document.getElementById('buscarCeco')?.value||'').toLowerCase();
+  const lista = (catalogos.cecos||[]).filter(c=>
+    !q || c.c.toLowerCase().includes(q) || c.d.toLowerCase().includes(q)
+  ).slice(0, 100);
+
+  const rows = lista.map((c,i)=>`
+    <tr>
+      <td style="font-family:monospace">${c.c}</td>
+      <td>${c.d}</td>
+      <td><span class="badge-${c.s.toLowerCase()}">${c.s}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('tablaCecos').innerHTML = `
+    <table class="cat-table">
+      <thead><tr><th>Código</th><th>Descripción</th><th>Sociedad</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="font-size:11px;color:#9ca3af;padding:8px">Mostrando ${lista.length} de ${catalogos.cecos?.length||0}</p>`;
+}
+
+async function agregarCeco(){
+  const codigo = prompt('Código del CeCo:');
+  if(!codigo) return;
+  const desc = prompt('Descripción:');
+  if(!desc) return;
+  const soc = prompt('Sociedad (C101/C105):') || 'C101';
+
+  catalogos.cecos = catalogos.cecos || [];
+  catalogos.cecos.push({c: codigo.trim(), d: desc.trim(), s: soc.trim()});
+  catalogos.cecos.sort((a,b)=>a.c.localeCompare(b.c));
+
+  await guardarCatalogos('Agregar CeCo: '+codigo);
+  renderCecos();
+}
+
+// ── Catálogos — Cuentas ───────────────────────────────────────────────
+function renderCuentas(){
+  const q = (document.getElementById('buscarCuenta')?.value||'').toLowerCase();
+  const lista = (catalogos.cuentas||[]).filter(c=>
+    !q || c.c.toLowerCase().includes(q) || c.d.toLowerCase().includes(q)
+  ).slice(0, 100);
+
+  const rows = lista.map((c,i)=>`
+    <tr>
+      <td style="font-family:monospace">${c.c}</td>
+      <td>${c.d}</td>
+      <td><span class="badge-${c.s.toLowerCase()}">${c.s}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('tablaCuentas').innerHTML = `
+    <table class="cat-table">
+      <thead><tr><th>Código</th><th>Descripción</th><th>Sociedad</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="font-size:11px;color:#9ca3af;padding:8px">Mostrando ${lista.length} de ${catalogos.cuentas?.length||0}</p>`;
+}
+
+async function agregarCuenta(){
+  const codigo = prompt('Código de cuenta:');
+  if(!codigo) return;
+  const desc = prompt('Descripción:');
+  if(!desc) return;
+  const soc = prompt('Sociedad (C101/C105):') || 'C101';
+
+  catalogos.cuentas = catalogos.cuentas || [];
+  catalogos.cuentas.push({c: codigo.trim(), d: desc.trim(), s: soc.trim()});
+  catalogos.cuentas.sort((a,b)=>a.c.localeCompare(b.c));
+
+  await guardarCatalogos('Agregar cuenta: '+codigo);
+  renderCuentas();
+}
+
+// ── Guardar catálogos ─────────────────────────────────────────────────
+async function guardarCatalogos(mensaje){
+  try {
+    const result = await githubPut('catalogos.json', catalogos, catalogoSHA, mensaje);
+    catalogoSHA = result.content.sha;
+    toast('✓ Catálogo actualizado');
+  } catch(e){
+    toast('Error guardando: '+e.message, 'err');
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function toast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='err' ? '#b91c1c' : '#1B3A6B';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+cargarDatos();
+</script>
+</body>
+</html>
