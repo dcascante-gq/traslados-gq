@@ -1,3 +1,19 @@
 {
-  "traslados": []
+  "traslados": [
+    {
+      "num_solicitud": "SOL-2026-0015",
+      "fecha": "6/7/2026",
+      "solicitante": "Diego Armando Cascante Alvarado",
+      "correo_solicitante": "dcascante@grupoq.com",
+      "empresa": "C101",
+      "tipo": "Traslado",
+      "total_aumentos": "100.00",
+      "total_disminuciones": "100.00",
+      "cantidad_lineas": 2,
+      "lineas": "1|COL|DISMINUCI?N|COL|APT6460531|COL|Autopits Heredia|COL|6103020000|COL|Gastos no Deducibles|COL|$100.00|COL|Prueba|LINEA|2|COL|AUMENTO|COL|APT9970531|COL|Autopits Desamparados|COL|6103020000|COL|Gastos no Deducibles|COL|$100.00|COL|Prueba",
+      "estado": "Pendiente",
+      "fecha_proceso": "",
+      "observacion": ""
+    }
+  ]
 }
